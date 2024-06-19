@@ -1,8 +1,8 @@
 {
   "name": "hr-web",
   "version": "0.0.1",
-  "description": "A Construction Monitoring System",
-  "productName": "Carpenter's Cut App",
+  "description": "A Human Resource Management System",
+  "productName": "Paceman MPC",
   "author": "genru06 <genru06@gmail.com>",
   "private": true,
   "scripts": {

@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { defineStore } from 'pinia';
 import { LocalStorage } from 'quasar';
-import { auth_api } from 'src/boot/axios';
+import { auth_api, hr_api } from 'src/boot/axios';
 
 export const useUserStore = defineStore('user', {
   state: () => {
@@ -38,7 +38,7 @@ export const useUserStore = defineStore('user', {
 
     async login(username, password) {
       try {
-        await auth_api.post('auth/login', { username, password }).then(async (res) => {
+        await hr_api.post('auth/login', { username, password }).then(async (res) => {
           if (res.data.isValidated) {
             this.token = res.data.access_token
             LocalStorage.set('access_token', this.token)

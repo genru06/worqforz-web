@@ -3,14 +3,14 @@
     <img
       class="background"
       style="width: 150%; right: 0"
-      src="../assets/cover_page.jpg"
+      src="../assets/login_bg.jpg"
     />
     <div class="row justify-center">
       <div class="login-wrapper" style="width: 500px">
         <div class="column bg-white">
           <q-card flat class="my-card col-lg-6 self-center">
             <q-card-section class="row justify-center">
-              <img style="width: 100%" src="../assets/po_header.jpg" />
+              <img style="width: 100%" src="../assets/paceman-header.jpg" />
             </q-card-section>
             <!-- <q-card-section class="text-center q-pt-none">
               <h5 class="q-ma-none">{{ coopName }}</h5>
