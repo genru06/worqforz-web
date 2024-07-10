@@ -86,6 +86,15 @@
               }}
             </q-tooltip>
           </q-btn>
+          <q-btn
+            flat
+            dense
+            color="primary"
+            icon="summarize"
+            @click="generatePayrollReport()"
+          >
+            <q-tooltip> Generate Payroll Report </q-tooltip>
+          </q-btn>
         </template>
         <template #header-cell="props">
           <q-th :props="props" class="text-capitalize text-bold">
@@ -94,7 +103,12 @@
         </template>
         <template #body="props">
           <q-tr :props="props">
-            <q-td v-for="c in columns" :key="c.name" :props="props">
+            <q-td
+              v-for="c in columns"
+              :key="c.name"
+              :props="props"
+              :class="getColumnClass(c)"
+            >
               <div v-if="c.name != 'actions'">
                 {{ props.row[c.name] || 0 }}
                 <q-popup-edit
@@ -126,6 +140,7 @@
                   color="warning"
                   size="sm"
                   label="Approve Payroll"
+                  @click="approvePayroll(props.row, props.cols)"
                 />
                 <q-btn
                   v-if="props.row.status"
@@ -134,6 +149,7 @@
                   color="negative"
                   size="sm"
                   label="Recalculate"
+                  @click="recalculatePayroll(props.row)"
                 />
               </div>
             </q-td>
@@ -155,10 +171,11 @@
 import { ref, watch } from "vue";
 import SetPayrollForm from "../../components/payroll/SetPayrollForm.vue";
 import HeaderLayout from "../../layouts/HeaderLayout.vue";
-import { hr_api } from "src/boot/axios";
-import { date } from "quasar";
+import { coop_api, hr_api } from "src/boot/axios";
+import { LocalStorage, date } from "quasar";
 import { usePayrollStore } from "../../stores/payroll";
 import { useConstants } from "src/stores/constants";
+import { useRoute, useRouter } from "vue-router";
 
 const payrollStore = usePayrollStore();
 const constants = useConstants();
@@ -175,6 +192,10 @@ const charges = ref([]);
 const manHours = ref([]);
 const coopDeduction = ref([]);
 let payrollReport = [];
+const user = LocalStorage.getItem("user");
+
+const route = useRoute();
+const router = useRouter();
 
 const pagination = ref({
   page: 1,
@@ -189,6 +210,16 @@ let sssTable = ref([]);
 
 const changeDetails = async (name, row, user_id) => {
   calculatePayroll(row, name, user_id);
+};
+
+const generatePayrollReport = () => {
+  const url =
+    process.env.HR_API_URL +
+    "payroll/report/generate/" +
+    payrollPeriod.value.per_id;
+  console.log(url);
+
+  window.open(url, "_blank");
 };
 
 const setTableTitle = async (details) => {
@@ -216,15 +247,34 @@ const payrollPeriodFn = async (val, update, abort) => {
   });
 };
 
+const getColumnClass = (col) => {
+  if (col.name.toLowerCase() === "name") {
+    return "frozen-column first";
+  } else if (col.name.toLowerCase() === "position") {
+    return "frozen-column second";
+  } else if (col.name === "gross_pay") {
+    return "frozen-column third";
+  }
+  return "";
+};
+
 const loadPayrollPeriod = async () => {
   await getSSSTable();
   await payrollStore.fetchColumnUsed();
   columns.value = JSON.parse(payrollStore.getColumns);
+  console.log(columns.value);
   await hr_api.get("payroll/getPP").then((response) => {
     for (const c in response.data) {
       pp.push(response.data[c]);
     }
   });
+
+  if (route.params["payrollPeriod"]) {
+    payrollPeriod.value = pp.filter(
+      (v) => v.per_id == route.params["payrollPeriod"]
+    )[0];
+    setTableTitle(payrollPeriod.value);
+  }
 };
 
 const getSSSTable = async () => {
@@ -284,9 +334,13 @@ const getPayrollPerPage = async (props) => {
   const { page, rowsPerPage, sortBy, descending } = props.pagination;
   const needle = props.filter;
   if (needle == "") {
-    console.log(props.pagination);
     const offset = (page - 1) * rowsPerPage;
     const limit = rowsPerPage;
+    router.push(
+      "/payroll/create/" +
+        payrollPeriod.value.per_id +
+        `/${page}/${offset}/${limit}`
+    );
     getPayrollReport(offset, limit, page);
   } else {
     console.log(needle);
@@ -295,6 +349,40 @@ const getPayrollPerPage = async (props) => {
     );
     tablerows.value = filteredRow;
   }
+};
+
+const approvePayroll = async (row, col) => {
+  console.log(row, col);
+  const payrollDetails = {};
+  const { coopDeduction, ...rowDetails } = row;
+  for (const r in rowDetails) {
+    if (r != "name" && r != "position" && row[r] != undefined) {
+      const value = isNaN(row[r])
+        ? parseFloat(row[r].replace(/,/g, ""))
+        : row[r];
+      payrollDetails[r] = value;
+    }
+  }
+  payrollDetails.payrollPeriod = payrollPeriod.value.per_id;
+  payrollDetails.coopDeduction = coopDeduction;
+  console.log(payrollDetails);
+
+  await hr_api.post("payroll/approved", payrollDetails).then((response) => {
+    tablerows.value[row.id].status = true;
+  });
+};
+
+const recalculatePayroll = async (row) => {
+  const details = {
+    profile: row.profile_id,
+    payrollPeriod: payrollPeriod.value.per_id,
+    status: false,
+    details: JSON.stringify({}),
+  };
+
+  await hr_api.post("payroll/recalculate", details).then((response) => {
+    tablerows.value[row.id].status = false;
+  });
 };
 
 const getPayrollReport = async (offset = 0, limit = 15, page = 1) => {
@@ -316,73 +404,187 @@ const getPayrollReport = async (offset = 0, limit = 15, page = 1) => {
     .then(async (response) => {
       pagination.value.rowsNumber = response.data.count;
       payrollReport = response.data.data;
-      calculatePayroll();
-      tableLoading.value = false;
       pagination.value.page = page;
+      calculatePayroll();
       // console.log(tablerows.value);
     });
 };
 
-const calculatePayroll = (r = null, name = null, user_id = null) => {
+const calculatePayroll = async (r = null, name = null, user_id = null) => {
   console.log("calculating...");
   tablerows.value = [];
+  let count = 0;
   for (let res of payrollReport) {
     let charges = {};
-    let val = [];
-    let deductions = 0;
-    // let coopDetails = {};
-    let manHours = fetchDaysWork(res.profile.user_id);
-    if (payrollPeriod.value.per_week_no == 1) {
-      val["sss"] = getSSSDeduction(res.gross_pay);
-    } else {
-      val["sss"] = 0;
-    }
-    val["philhealth"] = "100.00";
-    val["pag_ibig"] = getPagIbigDeduction(manHours);
+    charges["status"] = res.status;
+    charges["id"] = count;
 
-    charges["profile_id"] = res.profile.user_id;
-    charges["name"] = res.profile.lastname + ", " + res.profile.firstname;
-    charges["position"] = res.profile.employee
-      ? res.profile.employee.position.position
-      : "";
-    charges["gross_pay"] = constants.numberWithCommas(res.gross_pay);
-
-    for (let c of columns.value) {
-      let field = c.field;
-      if (
-        field != "name" &&
-        field != "position" &&
-        field != "gross_pay" &&
-        field != "net_pay" &&
-        field != "deductions"
-      ) {
-        if (name != null && field == name && res.profile.user_id == user_id) {
-          charges[field] = r;
-          val[field] = parseFloat(r);
-        } else {
-          charges[field] = val[field];
+    count++;
+    if (count <= 15) {
+      let val = [];
+      let deductions = 0;
+      if (!res.status) {
+        let statBen = await getStatBen(
+          res.payrollPeriod.per_id,
+          res.profile.user_id,
+          res.profile.employee.workplace.id,
+          res.gross_pay,
+          res.profile.employee.salary
+        );
+        let coopDeduction = await fetchCoopDeduction(res.profile.user_id);
+        charges["coopDeduction"] = coopDeduction.data;
+        const loanBalances = coopDeduction.data.balances;
+        if (coopDeduction.data.cad_share_capital < 5000) {
+          val["share_capital"] = 200;
         }
-        deductions += parseFloat(val[field]) || 0;
+        for (const lb of loanBalances) {
+          if (lb.status == 2) {
+            val[lb.loanName] = lb.balanceDue;
+          }
+        }
+        val["sss"] = statBen.data.sss;
+        val["philhealth"] = statBen.data.ph.toFixed(2);
+        val["pag_ibig"] = statBen.data.pagIbig.toFixed(2);
       }
-    }
-    charges["deductions"] = deductions.toFixed(2);
-    charges["net_pay"] = constants.numberWithCommas(
-      (parseFloat(res.gross_pay) - parseFloat(deductions)).toFixed(2)
-    );
 
-    tablerows.value.push(charges);
+      charges["profile_id"] = res.profile.user_id;
+      charges["name"] = res.profile.lastname + ", " + res.profile.firstname;
+      charges["position"] = res.profile.employee
+        ? res.profile.employee.position.position
+        : "";
+      charges["gross_pay"] = constants.numberWithCommas(res.gross_pay);
+
+      for (let c of columns.value) {
+        let field = c.field;
+        if (
+          field != "name" &&
+          field != "position" &&
+          field != "gross_pay" &&
+          field != "net_pay" &&
+          field != "deductions"
+        ) {
+          if (name != null && field == name && res.profile.user_id == user_id) {
+            charges[field] = r;
+            val[field] = parseFloat(r);
+          } else {
+            charges[field] = val[field];
+          }
+          deductions += parseFloat(val[field]) || 0;
+        }
+      }
+      if (charges["share_capital"] != 0 && !res.status) {
+        charges["coopDeduction"]["share_capital"] = charges["share_capital"];
+      }
+      charges["deductions"] = deductions.toFixed(2);
+      charges["net_pay"] = constants.numberWithCommas(
+        (parseFloat(res.gross_pay) - parseFloat(deductions)).toFixed(2)
+      );
+
+      if (res.status) {
+        for (const d in res.details) {
+          charges[d] = res.details[d];
+          charges["status"] = res.status;
+        }
+      }
+      charges["teller"] = user.id;
+
+      tablerows.value.push(charges);
+    }
   }
   console.log(tablerows.value);
+
+  tableLoading.value = false;
+};
+
+const fetchCoopDeduction = async (id) => {
+  return await coop_api.get("coop/loans/balances/individual/" + id).then();
+};
+
+const getStatBen = async (
+  pp_id,
+  profile_id,
+  workplace,
+  grossPay,
+  monthlyPay
+) => {
+  return await hr_api
+    .get(
+      "payroll/statBen/" +
+        pp_id +
+        "/" +
+        profile_id +
+        "/" +
+        workplace +
+        "/" +
+        grossPay +
+        "/" +
+        monthlyPay
+    )
+    .then();
 };
 
 watch(tableTitle, async (newValue) => {
   if (newValue) {
-    getPayrollReport();
+    if (route.params["payrollPeriod"]) {
+      console.log("has already ");
+
+      getPayrollReport(
+        route.params["offset"],
+        route.params["limit"],
+        route.params["page"]
+      );
+    } else {
+      router.push("/payroll/create/" + payrollPeriod.value.per_id + "/1/0/15/");
+      getPayrollReport(0, 15, 1);
+    }
   }
 });
 </script>
 
 <style lang="scss" scoped>
+.frozen-column {
+  position: sticky;
+  background: white;
+  z-index: 1;
+}
+
+.frozen-column.first {
+  left: 0;
+  z-index: 3; /* Ensure this column is on top of the other frozen columns */
+  width: 160px;
+}
+
+.frozen-column.second {
+  left: 160px; /* Adjust this based on the width of the first column */
+  z-index: 2; /* Ensure this column is below the first frozen column */
+}
+
+.frozen-column.third {
+  left: 320px; /* Adjust this based on the width of the first two columns */
+  z-index: 1; /* Ensure this column is below the first two frozen columns */
+  box-shadow: 2px 0 5px -2px #888;
+}
+
+.q-table__rows-container {
+  display: flex;
+}
+
+.q-table__row {
+  display: flex;
+}
+
+.q-th.frozen-column.first {
+  left: 0;
+}
+
+.q-th.frozen-column.second {
+  left: 160px; /* Adjust this based on the width of the first column */
+}
+
+.q-th.frozen-column.third {
+  left: 330px; /* Adjust this based on the width of the first two columns */
+}
+
 .q-field__control {
   border-bottom: 2px solid black !important;
 }

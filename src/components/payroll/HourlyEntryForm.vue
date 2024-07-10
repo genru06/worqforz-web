@@ -48,7 +48,11 @@
         type="text"
         label="Hours work"
         class="col"
-      />
+      >
+        <q-tooltip v-if="!dailyHours.pdh_day_id">
+          Please select days of week first
+        </q-tooltip>
+      </q-input>
       <q-input
         v-model="dailyHours.pdh_hours_amt"
         dense
@@ -482,7 +486,7 @@ const setManHourDailyEntries = async (profile) => {
   restDay.value = restDayOption.value.filter(
     (v) => v.value == profile.restDay
   )[0];
-  console.log(restDay.value);
+  clearManHours(0);
 };
 
 const getManHourType = async () => {
@@ -546,9 +550,16 @@ const getManHoursDaily = async () => {
         props.payrollPeriod.per_id
     )
     .then((response) => {
-      const selectedDate = response.data.filter(
-        (v) => v.pdh_date == dailyHours.value.pdh_day_id.date
+      let selectedDate = response.data.filter(
+        (v) => v.pdh_day_id == dailyHours.value.pdh_day_id.value
       )[0];
+      if (response.data[0].pdh_auto) {
+        selectedDate = response.data.filter(
+          (v) => v.pdh_date == dailyHours.value.pdh_day_id.date
+        )[0];
+      }
+
+      console.log("selected date", dailyHours.value);
 
       if (selectedDate) {
         dailyHours.value = selectedDate;
@@ -602,6 +613,7 @@ const clearManHours = (d) => {
     pdh_hd_sp: 0,
     pdh_hd_sp_amt: 0,
   };
+  daysWork.value = 0;
 };
 
 const submitDailyHours = async () => {
@@ -630,18 +642,36 @@ const getWeeklyTotal = (details) => {
 
   for (const d of details) {
     totalHours += parseFloat(d.pdh_hours);
-    nd += parseFloat(d.pdh_nd_reg);
-    nd += parseFloat(d.pdh_nd_hd);
-    nd += parseFloat(d.pdh_nd_sp);
+    nd += parseFloat(d.pdh_nd_reg || 0);
+    nd += parseFloat(d.pdh_nd_hd || 0);
+    nd += parseFloat(d.pdh_nd_sp || 0);
+    ot += parseFloat(d.pdh_ot_reg || 0);
+    ot += parseFloat(d.pdh_ot_hd || 0);
+    ot += parseFloat(d.pdh_ot_sp || 0);
+    hd += parseFloat(d.pdh_hd_reg || 0);
+    hd += parseFloat(d.pdh_hd_hd || 0);
+    hd += parseFloat(d.pdh_hd_sp || 0);
   }
 
   daysWork.value = totalHours / 8;
   totalND.value = nd;
+  totalOT.value = ot;
+  totalHD.value = hd;
 };
 
 const manhours = ref(0);
 
 watch(manhours, async (newValue) => {
+  if (!dailyHours.value.pdh_day_id) {
+    $q.notify({
+      color: "negative",
+      position: "top",
+      message: "Please Select Days of Week First",
+      icon: "warning",
+    });
+    manhours.value = 0;
+    return;
+  }
   const hours = newValue;
   const basic = parseFloat(form.value.profile.salary);
   console.log(hours, basic);
@@ -649,14 +679,12 @@ watch(manhours, async (newValue) => {
   const dutyOnRestDay = dailyHours.value.pdh_day_id.value == restDay;
   dailyHours.value.pdh_hours = hours;
   dailyHours.value.pdh_hours_amt = eval("(hours / 8) * basic");
-
   if (dutyOnRestDay) {
     dailyHours.value.pdh_sd_amt = eval(manHourType["prmh_sd_hrs"].formula);
   }
   if (isHoliday && dutyOnRestDay) {
     console.log("RHD");
   }
-
   console.log(restDay, dutyOnRestDay);
   // console.log(dailyHours);
   // console.log(manHourType);

@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div class="column">
     <img
       class="background"
       style="width: 150%; right: 0"
       src="../assets/login_bg.jpg"
     />
-    <div class="row justify-center">
+    <div class="row col self-center justify-center">
       <div class="login-wrapper" style="width: 500px">
         <div class="column bg-white">
           <q-card flat class="my-card col-lg-6 self-center">

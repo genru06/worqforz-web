@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { defineStore } from 'pinia';
-import { LocalStorage } from 'quasar';
+import { Cookies, LocalStorage } from 'quasar';
 import { auth_api, hr_api } from 'src/boot/axios';
 
 export const useUserStore = defineStore('user', {
@@ -38,16 +38,16 @@ export const useUserStore = defineStore('user', {
 
     async login(username, password) {
       try {
-        await hr_api.post('auth/login', { username, password }).then(async (res) => {
+        await auth_api.post('auth/login', { username, password }).then(async (res) => {
           if (res.data.isValidated) {
             this.token = res.data.access_token
             LocalStorage.set('access_token', this.token)
-            this.isLogin = true
+            Cookies.set('access_token', this.token, { domain: process.env.DOMAIN })
             LocalStorage.set('is_login', true)
             LocalStorage.set('appId', res.data.user.application.client_id)
             this.$state.response = res.data
             const payload = {
-              id: res.data.user.u_id,
+              id: res.data.id,
               name: res.data.user.uname,
               isActive: res.data.user.isActive,
               isValidated: res.data.isValidated,
@@ -59,6 +59,7 @@ export const useUserStore = defineStore('user', {
             }
 
             LocalStorage.set('user', payload);
+            Cookies.set('user', JSON.stringify(payload), { domain: process.env.DOMAIN })
             this.setUser(payload)
           } else {
             this.$state.response = res.data
@@ -123,6 +124,8 @@ export const useUserStore = defineStore('user', {
       this.token = ''
       this.response = []
       LocalStorage.clear();
+      Cookies.remove('access_token')
+      Cookies.remove('user')
     }
   },
 });

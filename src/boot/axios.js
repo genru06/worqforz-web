@@ -9,6 +9,7 @@ import axios from 'axios'
 // for each client)
 const auth_api = axios.create({ baseURL: process.env.AUTH_API_URL })
 const hr_api = axios.create({ baseURL: process.env.HR_API_URL })
+const coop_api = axios.create({ baseURL: process.env.COOP_API_URL })
 
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
@@ -19,8 +20,9 @@ export default boot(({ app }) => {
 
   app.config.globalProperties.$api = auth_api
   app.config.globalProperties.$api = hr_api
+  app.config.globalProperties.$api = coop_api
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
 })
 
-export { auth_api, hr_api }
+export { auth_api, hr_api, coop_api }

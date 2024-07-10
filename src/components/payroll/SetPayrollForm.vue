@@ -104,10 +104,18 @@ const form = ref({
   per_code: Date.now(),
   per_week: "",
   workplace: "Select a Workplace",
+  headers: "",
 });
 const workplaceOptions = ref(constants.workplace);
 
+const getColumnUsed = async () => {
+  await hr_api.get("payroll/charges/").then((response) => {
+    form.value.headers = response.data;
+  });
+};
+
 const setPayroll = async () => {
+  // console.log(form.value);
   hr_api.post("payroll/set", form.value).then(() => {
     $q.notify({
       color: "positive",
@@ -117,6 +125,7 @@ const setPayroll = async () => {
     });
   });
 };
+getColumnUsed();
 </script>
 
 <style scoped></style>

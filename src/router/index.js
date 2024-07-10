@@ -2,7 +2,7 @@ import { route } from 'quasar/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
 import { useUserStore } from 'src/stores/user-store';
-import { LocalStorage } from 'quasar';
+import { Cookies, LocalStorage } from 'quasar';
 
 /*
  * If not building with SSR mode, you can
@@ -32,8 +32,8 @@ export default route(function (/* { store, ssrContext } */) {
 
   Router.beforeEach((to, from, next) => {
     const auth = useUserStore();
-    const token = LocalStorage.getItem('access_token')
-    const user = LocalStorage.getItem("user");
+    const token = Cookies.get('access_token')
+    const user = Cookies.get('user');
 
     if (user) {
       const roles = user.roles;
@@ -45,6 +45,7 @@ export default route(function (/* { store, ssrContext } */) {
           const JwtPayLoad = auth.parseJwt(token);
           if (JwtPayLoad.exp < (Date.now() / 1000)) {
             auth.clearUser();
+            next({ path: '/login', replace: true, query: { redirect: to.fullPath } })
           } else {
             next();
           }

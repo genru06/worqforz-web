@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated reveal class="bg-secondary text-primary">
+    <q-header elevated reveal class="bg-primary text-white">
       <q-toolbar>
         <q-btn
           flat
@@ -111,20 +111,16 @@
     <q-footer bordered class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title class="gt-md">
-          <div class="float-right text-lg">
-            Powered By : CoMonSys Version 2.0
-          </div>
+          <div class="float-right text-lg">Powered By : Worqforz</div>
 
           <strong class="text-lg"
-            >Copyright © 2023
-            <a href="https://paceman.com">GeZaFaMa Systems</a>.</strong
+            >Copyright © 2024
+            <a href="https://paceman.com">Canaan ICT Solutions Inc</a>.</strong
           >
           All rights reserved.
         </q-toolbar-title>
         <q-toolbar-title class="lt-lg">
-          <div class="float-right text-lg">
-            Powered By : CoMonSys Version 2.0
-          </div>
+          <div class="float-right text-lg">Powered By : Worqforz</div>
         </q-toolbar-title>
       </q-toolbar>
     </q-footer>

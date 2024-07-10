@@ -145,12 +145,13 @@
 </template>
 
 <script setup>
-import { LocalStorage, date } from "quasar";
+import { LocalStorage, date, useQuasar } from "quasar";
 import { ref } from "vue";
 import { hr_api } from "../../boot/axios";
 const confirm = ref(false);
 const fromDate = ref();
 const toDate = ref();
+const $q = useQuasar();
 
 const uploadForm = ref(false);
 const uploadURL = ref(process.env.HR_API_URL + "employee/upload/");
