@@ -48,6 +48,7 @@ export const usePayrollStore = defineStore('payrollStore', {
 
       await hr_api.get('payroll/charges/' + ppId).then((response) => {
         this.charges = response.data;
+        console.log(this.charges)
         for (const r in response.data) {
           col.push({
             name: response.data[r].columns,

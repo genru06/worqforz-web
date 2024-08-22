@@ -293,6 +293,7 @@ const loadData = () => {
 
 const getAllProfileByWorkplace = async () => {
   loading.value = true;
+  console.log(hr_api);
   await hr_api
     .get("/profile/all/workplace/" + emStatus.value)
     .then((response) => {

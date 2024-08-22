@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-tabs v-model="tab" inline-label class="gt-sm text-white">
+    <q-tabs v-model="tab" inline-label class="gt-sm text-primary">
       <q-route-tab
         v-for="item in menuItems"
         :key="item.name"

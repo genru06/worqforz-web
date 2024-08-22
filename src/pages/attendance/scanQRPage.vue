@@ -4,7 +4,7 @@
       <div class="column q-py-sm items-center bg-white">
         <img
           class="edashboard-header"
-          src="../../assets/paceman-header.jpg"
+          src="../../assets/po_header.jpg"
           alt="Header Image"
         />
       </div>
@@ -38,7 +38,7 @@
               label="DASHBOARD"
               type="submit"
               color="teal"
-              to="/dashboard"
+              to="/dashboard/time-keeper"
             >
               <template v-slot:loading> <q-spinner-facebook /> </template
             ></q-btn>
