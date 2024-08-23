@@ -17,16 +17,18 @@ import { useRoute, useRouter } from "vue-router";
 // import { useAttendanceStore } from "../stores/attendance";
 
 const user = LocalStorage.getItem("user");
-const is_tl = user.profile.employee.is_tl;
-const router = useRouter();
+if (user.roles != "SUPER") {
+  const is_tl = user.profile.employee.is_tl;
+  const router = useRouter();
 
-if (is_tl) {
-  router.push("/dashboard/time-keeper");
-} else {
-  constants.fetchAllWorkplace();
-  constants.fetchDepartments();
+  if (is_tl) {
+    router.push("/dashboard/time-keeper");
+  } else {
+    constants.fetchAllWorkplace();
+    constants.fetchDepartments();
+  }
+  console.log("is tl : ", is_tl);
 }
-console.log("is tl : ", is_tl);
 
 const constants = useConstants();
 </script>
