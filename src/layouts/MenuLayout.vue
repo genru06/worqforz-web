@@ -17,16 +17,18 @@
 import { LocalStorage } from "quasar";
 import MenuLayout from "./MenuLayout.vue";
 import { ref } from "vue";
+import { useUserStore } from "src/stores/user-store";
 
 // const user = LocalStorage.getItem("user");
 // const roles = user.roles;
+const userStore = useUserStore();
 const props = defineProps({
   routes: {
     type: Object,
     required: true,
   },
 });
-const user = LocalStorage.getItem("user");
+const user = LocalStorage.getItem("user") || userStore.setLocalStorage();
 const menuItems = ref([]);
 const roles = user.roles.split(",");
 for (const r of props.routes) {

@@ -83,7 +83,7 @@ const routes = [
   {
     path: '/scan',
     component: () => import('pages/attendance/scanQRPage.vue'),
-    meta: { roles: ["SUPER", "HUMAN RESOURCE DEPARTMENT HEAD", "TIME KEEPER"], name: 'Attendance Scanning' }
+    meta: { roles: ["SUPER", "HUMAN RESOURCE DEPARTMENT HEAD", "TIME KEEPER",], name: 'Attendance Scanning' }
   },
   {
     path: '/dashboard/time-keeper',

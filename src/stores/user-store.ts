@@ -46,16 +46,14 @@ export const useUserStore = defineStore('user', {
             LocalStorage.set('is_login', true)
             LocalStorage.set('appId', res.data.user.application.client_id)
             this.$state.response = res.data
+            const profile = await hr_api.get('profile/getByUserAccount/' + res.data.id).then();
             const payload = {
               id: res.data.id,
               name: res.data.user.uname,
               isActive: res.data.user.isActive,
               isValidated: res.data.isValidated,
-              roles: res.data.user.roles
-              // employeeNumber: res.data.user.employee_id,
-              // position: res.data.user.u_id.employee.position.position,
-              // managed_workplace: res.data.user.u_id.employee.managed_workplace,
-              // shift_group: res.data.user.u_id.employee.shift_group_id.grp_id
+              roles: res.data.user.roles,
+              profile: profile.data
             }
 
             LocalStorage.set('user', payload);
@@ -107,6 +105,11 @@ export const useUserStore = defineStore('user', {
     //     }
     //   },
 
+    setLocalStorage() {
+      const user = Cookies.get("user");
+      LocalStorage.set('user', user);
+      return user;
+    },
     setUser(payload) {
       if (payload.id) this.id = payload.id
       if (payload.name) this.name = payload.name

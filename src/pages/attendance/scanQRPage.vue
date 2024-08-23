@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { date } from "quasar";
+import { date, LocalStorage, useQuasar } from "quasar";
 import { socket } from "../../boot/socket";
 import { StreamBarcodeReader } from "vue-barcode-reader";
 import { ref } from "vue";
@@ -100,22 +100,42 @@ const warning = ref(false);
 const scannerReady = ref(false);
 const headerImage = ref(process.env.COMPANY_HEADER_IMG);
 let id = "";
+const $q = useQuasar();
+
+const user = LocalStorage.getItem("user");
+const workers = user.profile.employee.workplace.workers;
+const workplace = ref(user.profile.employee.workplace.id);
+
+console.log(workers);
 
 const onDecode = (text) => {
   const decodedValue = JSON.parse(text);
-  console.log("decoded value:", decodedValue);
+  // console.log("decoded value:", decodedValue);
 
-  const details = {
-    fn: "qrScan",
-    body: text,
-    params: {
-      time_scan: date.formatDate(Date.now(), "YYYY-MM-DD HH:mm:ss"),
-      socketID: localStorage.getItem("socketID"),
-    },
-  };
-  if (id == "") {
-    socket.emit("attendance", details);
-    id = decodedValue.id;
+  const workplaceDetails = workers.filter(
+    (v) => v.employee_id == decodedValue.id
+  )[0];
+  console.log(workplaceDetails);
+  if (workplaceDetails) {
+    const details = {
+      fn: "qrScan",
+      body: text,
+      params: {
+        time_scan: date.formatDate(Date.now(), "YYYY-MM-DD HH:mm:ss"),
+        socketID: localStorage.getItem("socketID"),
+        time_in: workplaceDetails.time_in,
+        time_out: workplaceDetails.time_out,
+      },
+    };
+    if (id == "") {
+      socket.emit("attendance", details);
+      id = decodedValue.id;
+    }
+  } else {
+    $q.dialog({
+      title: "SCAN Info",
+      message: "Sorry, this worker doesn't belong in this workplace",
+    });
   }
 
   socket.on("qrResults", (details) => {

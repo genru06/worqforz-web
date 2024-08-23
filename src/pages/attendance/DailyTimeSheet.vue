@@ -1152,7 +1152,7 @@ const fetchDailyAttendance = async () => {
           remarks: response[res].remarks,
           pr_status: response[res].pr_status,
           employee: response[res].employee,
-          payroll_shift: response[res].shift.payroll_shift,
+          payroll_shift: response[res].shift?.payroll_shift || null,
         });
         // }
       }

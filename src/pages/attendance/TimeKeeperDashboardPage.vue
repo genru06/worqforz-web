@@ -33,7 +33,7 @@
             type="submit"
             color="teal"
             :loading="submitting"
-            :to="'/attendance/dts/' + managedDepartment"
+            :to="'/attendance/dts/' + workplace"
           >
             <template v-slot:loading> <q-spinner-facebook /> </template
           ></q-btn>
@@ -73,6 +73,8 @@ const props = defineProps({
 const userStore = useUserStore();
 const router = useRouter();
 const name = ref(userStore.$state.name || "");
+const user = LocalStorage.getItem("user");
+const workplace = ref(user.profile.employee.workplace.id);
 
 const logout = () => {
   userStore.clearUser();

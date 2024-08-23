@@ -143,6 +143,7 @@ const isTL = ref(true);
 const shortName = ref(process.env.SHORT_NAME);
 const drawer = ref(false);
 const leftDrawer = ref(false);
+const logo = ref("src/assets/logo.png");
 
 const name = ref(userStore.$state.name || "");
 
