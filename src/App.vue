@@ -2,10 +2,13 @@
   <router-view />
 </template>
 
-<script>
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { socket } from "./boot/socket";
 
-export default defineComponent({
-  name: 'App'
-})
+// if (!localStorage.getItem("socketID")) {
+socket.emit("join");
+socket.on("socketConnect", (details) => {
+  console.log("connected :", details);
+});
+// }
 </script>
