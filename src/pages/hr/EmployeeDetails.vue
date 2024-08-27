@@ -7,13 +7,13 @@
       <q-btn to="/hr/" outline color="grey-8" label="Dashboard" />
       <q-btn to="/hr/employee/list/" outline color="grey-8" label="Employees" />
       <q-btn
-        v-if="basicInfo.user == 0"
+        v-if="basicInfo.user == 0 || !basicInfo.user"
         color="grey-8"
         label="Register User"
         @click="generateAccountModal = true"
       />
       <q-btn
-        v-if="basicInfo.user != 0"
+        v-if="basicInfo.user != null"
         color="grey-8"
         label="Remove User"
         @click="removeUserModal = true"
@@ -1141,6 +1141,7 @@ const loadData = async () => {
     visible.value = false;
 
     basicInfo.value = response.data;
+    console.log(basicInfo.value);
     if (response.data.address && response.data.address.length > 0) {
       addressInfo.value = response.data.address[0];
     }

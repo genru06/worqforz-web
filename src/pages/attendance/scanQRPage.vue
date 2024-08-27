@@ -4,7 +4,7 @@
       <div class="column q-py-sm items-center bg-white">
         <img
           class="edashboard-header"
-          src="../../assets/po_header.jpg"
+          src="../../assets/paceman-header.jpg"
           alt="Header Image"
         />
       </div>

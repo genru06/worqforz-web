@@ -198,13 +198,11 @@
             <td>{{ mhd.sd_amt || "0.00" }}</td>
             <td>
               {{
-                numberWithCommas(
-                  (
-                    parseFloat(mhd.reg_amt || 0) +
+                getGrossPay(
+                  parseFloat(mhd.reg_amt || 0) +
                     parseFloat(mhd.ot_reg_amt || 0) +
                     parseFloat(mhd.ot_sp_amt || 0) +
                     parseFloat(mhd.ot_hd_amt || 0) +
-                    parseFloat(mhd.otnd_reg_amt || 0) +
                     parseFloat(mhd.otnd_reg_amt || 0) +
                     parseFloat(mhd.otnd_sp_amt || 0) +
                     parseFloat(mhd.otnd_hd_amt || 0) +
@@ -213,8 +211,8 @@
                     parseFloat(mhd.nd_hd_amt || 0) +
                     parseFloat(mhd.hd_sp_amt || 0) +
                     parseFloat(mhd.hd_reg_amt || 0) +
-                    parseFloat(mhd.sd_amt || 0)
-                  ).toFixed(2)
+                    parseFloat(mhd.sd_amt || 0),
+                  mhd.pdh_emp_id
                 )
               }}
             </td>
@@ -249,14 +247,18 @@ import { ref } from "vue";
 import { hr_api } from "../../boot/axios";
 import HourlyEntryForm from "../../components/payroll/HourlyEntryForm.vue";
 import HeaderLayout from "../../layouts/HeaderLayout.vue";
+import { useRoute, useRouter } from "vue-router";
 
 const payrollPeriod = ref();
 const selectedPayrollPeriod = ref();
 const pp = [];
 const ppOptions = ref(pp);
 const manHourDailyDetails = ref();
+const grossPayPerEmployee = [];
 
 const addManHourDaily = ref(false);
+const route = useRoute();
+const router = useRouter();
 
 const payrollPeriodFn = async (val, update, abort) => {
   if (pp.length == 0) {
@@ -275,12 +277,48 @@ const payrollPeriodFn = async (val, update, abort) => {
   });
 };
 
+const getGrossPay = (details, emp_id) => {
+  const payReportDetails = {
+    profile: emp_id,
+    payrollPeriod: selectedPayrollPeriod.value.per_id,
+    gross_pay: details.toFixed(2),
+  };
+  grossPayPerEmployee.push(payReportDetails);
+  return numberWithCommas(details.toFixed(2));
+};
+
 const fetchManHourDaily = async (v) => {
   selectedPayrollPeriod.value = v;
+  router.push("/payroll/man-hours/" + v.per_id);
   await hr_api.get("payroll/man-hours/all/" + v.per_id).then((response) => {
     manHourDailyDetails.value = response.data;
   });
+  console.log(grossPayPerEmployee);
+
+  await hr_api
+    .post("payroll/save-to-report", grossPayPerEmployee)
+    .then((response) => {
+      console.log(response);
+    });
 };
+const loadPage = async () => {
+  await hr_api.get("payroll/getPP").then((response) => {
+    for (const c in response.data) {
+      pp.push(response.data[c]);
+    }
+  });
+
+  if (route.params["payrollPeriod"]) {
+    console.log(route.params["payrollPeriod"]);
+    selectedPayrollPeriod.value = pp.filter(
+      (v) => v.per_id == route.params["payrollPeriod"]
+    )[0];
+    payrollPeriod.value = selectedPayrollPeriod.value;
+    fetchManHourDaily(payrollPeriod.value);
+  }
+};
+
+loadPage();
 
 const numberWithCommas = (x) => {
   if (x == null) {

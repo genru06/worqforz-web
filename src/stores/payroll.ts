@@ -23,7 +23,9 @@ export const usePayrollStore = defineStore('payrollStore', {
         label: 'Name of Employee',
         align: 'left',
         field: 'name',
-        sortable: true
+        sortable: true,
+        headerClasses: 'frozen-column first',
+        headerStyle: 'width:180px !important'
       },
         {
           name: 'position',
@@ -31,6 +33,8 @@ export const usePayrollStore = defineStore('payrollStore', {
           label: 'Position',
           align: 'center',
           field: 'position',
+          headerClasses: 'frozen-column second',
+          headerStyle: 'min-width:170px !important'
         },
         {
           name: 'gross_pay',
@@ -38,6 +42,8 @@ export const usePayrollStore = defineStore('payrollStore', {
           label: 'Gross Pay',
           align: 'right',
           field: 'gross_pay',
+          headerClasses: 'frozen-column third',
+          headerStyle: 'min-width:100px !important'
         });
 
       await hr_api.get('payroll/charges/' + ppId).then((response) => {

@@ -300,7 +300,7 @@ const columns = [
   {
     name: "actions",
     required: true,
-    label: "Is Recurring",
+    label: "",
     align: "center",
     field: "actions",
   },

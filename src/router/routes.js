@@ -5,21 +5,23 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       // { path: '', component: () => import('pages/IndexPage.vue') },
+
       {
         path: '/dashboard', component: () => import('pages/DashboardPage.vue'),
         meta: { roles: ["any"], name: 'Dashboard' }
       },
       {
         path: '/hr/dashboard', component: () => import('pages/hr/HrDashboardPage.vue'),
-        meta: { roles: ["SUPER", "HUMAN RESOURCE"], name: 'Human Resource' }
+        meta: { roles: ["SUPER", "Manager", "HUMAN RESOURCE"], name: 'Human Resource' }
       },
       {
-        path: 'monitoring', component: () => import('pages/hr/EmployeeMasterList.vue'),
-        meta: { roles: ["SUPER", "DESIGN ASSOCIATE", "CFO / PRINCIPAL ARCHITECT"], name: 'Construction Monitoring' }
+        path: '/members/profile', component: () => import('pages/DashboardPage.vue'),
+        beforeEnter() { location.href = process.env.COOP_URL + 'members/profile' },
+        meta: { roles: ["SUPER", "Manager", "Loan Officer", "Coop Coordinator"], name: 'COOP MANAGEMENT' }
       },
       {
-        path: '/payroll/create', component: () => import('pages/payroll/CreatePayrollPage.vue'),
-        meta: { roles: ["SUPER", , "BILLING AND ACCOUNTS"], name: 'Create Payroll' }
+        path: '/payroll/create/', component: () => import('pages/payroll/CreatePayrollPage.vue'),
+        meta: { roles: ["SUPER", "Manager", "Payroll Officer", "BILLING AND ACCOUNTS"], name: 'Create Payroll' }
       }
 
     ]
@@ -65,10 +67,18 @@ const routes = [
         meta: { roles: ["SUPER", "HUMAN RESOURCE", "BILLING AND ACCOUNTS"], name: 'Man Hours' }
       },
       {
+        path: 'man-hours/:payrollPeriod?', component: () => import('pages/payroll/ViewManHoursPage.vue'),
+        meta: { roles: ["SUPER", "HUMAN RESOURCE", "BILLING AND ACCOUNTS"], name: 'Man Hours' }
+      },
+      {
         path: '/attendance/dts/:workplace/:dept_id?',
         component: () => import('pages/attendance/DailyTimeSheet.vue'),
         meta: { roles: ["SUPER", "Human Resource", "Time Keeper"], name: 'Daily Time Sheet' }
       },
+      {
+        path: 'create/:payrollPeriod?/:page?/:offset?/:limit?', component: () => import('pages/payroll/CreatePayrollPage.vue'),
+        meta: { roles: ["SUPER", "Manager", "Payroll Officer", "BILLING AND ACCOUNTS"], name: 'Create Payroll' }
+      }
     ]
   },
   {
