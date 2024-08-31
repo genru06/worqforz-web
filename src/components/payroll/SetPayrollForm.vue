@@ -64,7 +64,7 @@
         </div>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-input v-model="form.per_week" dense type="text" label="Week No" />
+        <q-input v-model="form.per_week_no" dense type="text" label="Week No" />
       </q-card-section>
       <q-card-section class="q-pt-none">
         <q-select
@@ -73,7 +73,7 @@
           :options="workplaceOptions"
           option-label="name"
           option-value="id"
-          label="Leave Type"
+          label="Workplace"
         />
       </q-card-section>
       <q-card-actions horizontal align="right">
@@ -102,7 +102,7 @@ const form = ref({
   per_from: date.formatDate(Date.now(), "YYYY-MM-DD"),
   per_to: date.formatDate(Date.now(), "YYYY-MM-DD"),
   per_code: Date.now(),
-  per_week: "",
+  per_week_no: "",
   workplace: "Select a Workplace",
   headers: "",
 });
