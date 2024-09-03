@@ -14,12 +14,7 @@
         to="/payroll/man-hours"
         label="View Man hours"
       />
-      <q-btn
-        outline
-        color="grey-8"
-        to="/hr/settings"
-        label="Payroll Settings"
-      />
+      <q-btn outline color="grey-8" to="/settings" label="Payroll Settings" />
     </header-layout>
 
     <div class="q-pa-md">
@@ -431,17 +426,20 @@ const calculatePayroll = async (r = null, name = null, user_id = null) => {
           res.gross_pay,
           res.profile.employee.salary
         );
-        let coopDeduction = await fetchCoopDeduction(res.profile.user_id);
-        charges["coopDeduction"] = coopDeduction.data;
-        const loanBalances = coopDeduction.data.balances;
-        if (coopDeduction.data.cad_share_capital < 5000) {
-          val["share_capital"] = 200;
-        }
-        for (const lb of loanBalances) {
-          if (lb.status == 2) {
-            val[lb.loanName] = lb.balanceDue;
+        if (process.env.COOP_URL != "NONE") {
+          let coopDeduction = await fetchCoopDeduction(res.profile.user_id);
+          charges["coopDeduction"] = coopDeduction.data;
+          const loanBalances = coopDeduction.data.balances;
+          if (coopDeduction.data.cad_share_capital < 5000) {
+            val["share_capital"] = 200;
+          }
+          for (const lb of loanBalances) {
+            if (lb.status == 2) {
+              val[lb.loanName] = lb.balanceDue;
+            }
           }
         }
+
         val["sss"] = statBen.data.sss;
         val["philhealth"] = statBen.data.ph.toFixed(2);
         val["pag_ibig"] = statBen.data.pagIbig.toFixed(2);
@@ -472,8 +470,11 @@ const calculatePayroll = async (r = null, name = null, user_id = null) => {
           deductions += parseFloat(val[field]) || 0;
         }
       }
-      if (charges["share_capital"] != 0 && !res.status) {
-        charges["coopDeduction"]["share_capital"] = charges["share_capital"];
+
+      if (process.env.COOP_URL != "NONE") {
+        if (charges["share_capital"] != 0 && !res.status) {
+          charges["coopDeduction"]["share_capital"] = charges["share_capital"];
+        }
       }
       charges["deductions"] = deductions.toFixed(2);
       charges["net_pay"] = constants.numberWithCommas(

@@ -33,29 +33,25 @@ export default route(function (/* { store, ssrContext } */) {
   Router.beforeEach((to, from, next) => {
     const auth = useUserStore();
     const token = Cookies.get('access_token')
-    const user = Cookies.get('user');
+    const user = Cookies.get('user')
+    const currentTime = Math.floor(Date.now() / 1000)
 
-    if (user) {
-      const roles = user.roles;
-      var routeRoles = [];
-      // console.log('metaRoles', to.meta.roles)
-      if (to.meta.roles != undefined) routeRoles = to.meta.roles;
-      if (routeRoles.includes(roles) || routeRoles.includes('any')) {
-        if (token) {
-          const JwtPayLoad = auth.parseJwt(token);
-          if (JwtPayLoad.exp < (Date.now() / 1000)) {
-            auth.clearUser();
-            next({ path: '/login', replace: true, query: { redirect: to.fullPath } })
-          } else {
-            next();
-          }
-        } else {
-          next({ path: '/login', replace: true, query: { redirect: to.fullPath } })
-        }
+
+    if (token) {
+      const JwtPayLoad = auth.parseJwt(token);
+      if (JwtPayLoad.exp <= currentTime) {
+        auth.clearUser();
+        console.log('expired')
+        next({ path: '/login', replace: true, query: { redirect: to.fullPath } })
       } else {
-        next()
+        console.log(JwtPayLoad)
+        if (!LocalStorage.getItem('user')) {
+          LocalStorage.set('user', user)
+        }
+        next();
       }
     } else {
+      console.log('no token')
 
       if (to.path !== '/login') {
         next({ path: '/login' }); // Redirect to '/Login' path

@@ -7,13 +7,13 @@
       <q-btn to="/hr/" outline color="grey-8" label="Dashboard" />
       <q-btn to="/hr/employee/list/" outline color="grey-8" label="Employees" />
       <q-btn
-        v-if="basicInfo.user == 0 || !basicInfo.user"
+        v-if="!hasSystemAccess"
         color="grey-8"
         label="Register User"
         @click="generateAccountModal = true"
       />
       <q-btn
-        v-if="basicInfo.user != null"
+        v-if="hasSystemAccess"
         color="grey-8"
         label="Remove User"
         @click="removeUserModal = true"
@@ -888,9 +888,6 @@ const historyTab = ref("leaveHistory");
 const employeeID = route.params.id;
 const loading = ref(false);
 const visible = ref(true);
-const contact = ref({});
-const inCase = ref({});
-const family = ref({});
 const editable = ref(false);
 const pos = [];
 const positionOptions = ref(pos);
@@ -913,11 +910,6 @@ const phEdit = ref(false);
 const pagIbigEdit = ref(false);
 const tinEdit = ref(false);
 const bankEdit = ref(false);
-const spouseEdit = ref(false);
-const fatherEdit = ref(false);
-const fatherOccuEdit = ref(false);
-const motherEdit = ref(false);
-const motherOccuEdit = ref(false);
 const emergencyEditName = ref(false);
 const emergencyEditNumber = ref(false);
 const emergencyEditRelation = ref(false);
@@ -925,6 +917,8 @@ const qrUrl = ref("");
 const upload = ref(false);
 const file = ref();
 const timeShiftInfo = ref({});
+
+const hasSystemAccess = ref(false);
 
 const rd = [
   { value: 0, label: "Sunday" },
@@ -1141,7 +1135,8 @@ const loadData = async () => {
     visible.value = false;
 
     basicInfo.value = response.data;
-    console.log(basicInfo.value);
+    console.log("basicInfo : ", basicInfo.value);
+    hasSystemAccess.value = basicInfo.value.user > 0 ? true : false;
     if (response.data.address && response.data.address.length > 0) {
       addressInfo.value = response.data.address[0];
     }

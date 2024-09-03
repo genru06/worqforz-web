@@ -7,7 +7,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-input
           class="col"
-          borderless
           v-model="basicInfo.lastname"
           dense
           type="text"
@@ -16,7 +15,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="basicInfo.firstname"
           type="text"
@@ -27,14 +25,12 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="basicInfo.middlename"
           type="text"
           label="Middle Name :"
         />
         <q-input
-          borderless
           dense
           v-model="basicInfo.mobile"
           type="text"
@@ -43,7 +39,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="basicInfo.email"
           type="text"
@@ -53,7 +48,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-input
           class="col"
-          borderless
           dense
           v-model="addressInfo.street"
           type="text"
@@ -61,7 +55,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="addressInfo.barangay"
           type="text"
@@ -72,7 +65,6 @@
         <q-select
           class="col"
           dense
-          filled
           v-model="addressInfo.city"
           use-input
           hide-selected
@@ -96,7 +88,6 @@
 
         <q-input
           class="col"
-          borderless
           dense
           v-model="addressInfo.province"
           type="text"
@@ -104,7 +95,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="addressInfo.zipCode"
           type="text"
@@ -114,7 +104,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-input
           class="text-md col"
-          filled
           dense
           v-model="basicInfo.birthdate"
           mask="date"
@@ -140,7 +129,6 @@
 
         <q-select
           class="col"
-          filled
           dense
           v-model="basicInfo.sex"
           use-input
@@ -161,7 +149,6 @@
 
         <q-select
           class="col"
-          filled
           dense
           v-model="basicInfo.civilStatus"
           use-input
@@ -182,7 +169,6 @@
 
         <q-select
           class="col"
-          filled
           dense
           v-model="basicInfo.religion"
           use-input
@@ -195,7 +181,6 @@
           @filter="getReligion"
           label="Select Religion"
           bg-color="white"
-          :rules="[(val) => val || 'Please Select a Religion']"
         >
           <template v-slot:no-option>
             <q-item>
@@ -207,7 +192,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-input
           class="col"
-          borderless
           dense
           v-model="basicInfo.nationality"
           type="text"
@@ -215,7 +199,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="basicInfo.height"
           type="text"
@@ -223,7 +206,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="basicInfo.weight"
           type="text"
@@ -231,7 +213,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="basicInfo.eyeColor"
           type="text"
@@ -247,7 +228,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-input
           class="col"
-          borderless
           dense
           v-model="emergencyInfo.name"
           type="text"
@@ -255,7 +235,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="emergencyInfo.relation"
           type="text"
@@ -263,7 +242,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="emergencyInfo.number"
           type="text"
@@ -278,7 +256,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-select
           class="col"
-          filled
           dense
           v-model="employeeInfo.workplace"
           use-input
@@ -301,7 +278,6 @@
 
         <q-select
           class="col"
-          filled
           dense
           v-model="departmentSelect"
           use-input
@@ -326,7 +302,6 @@
 
         <q-select
           class="col"
-          filled
           dense
           v-model="employeeInfo.position"
           use-input
@@ -351,8 +326,7 @@
         <q-input
           class="col text-md"
           dense
-          filled
-          v-model="employeeInfo.dateHired"
+          v-model="employeeInfo.date_hired"
           mask="date"
           label="Date Hired : "
           bg-color="white"
@@ -364,7 +338,7 @@
                 transition-show="scale"
                 transition-hide="scale"
               >
-                <q-date v-model="employeeInfo.dateHired">
+                <q-date v-model="employeeInfo.date_hired">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Close" color="primary" flat />
                   </div>
@@ -377,7 +351,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-select
           class="col"
-          filled
           dense
           v-model="employeeInfo.emStatus"
           use-input
@@ -400,7 +373,6 @@
 
         <q-input
           class="col"
-          borderless
           dense
           v-model="employeeInfo.salary"
           type="text"
@@ -408,7 +380,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="employeeInfo.bankAccount"
           type="text"
@@ -425,7 +396,6 @@
       <q-card-section class="row q-gutter-sm">
         <q-input
           class="col"
-          borderless
           dense
           v-model="employeeInfo.sss"
           type="text"
@@ -433,7 +403,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="employeeInfo.philHealth"
           type="text"
@@ -441,7 +410,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="employeeInfo.pagIbig"
           type="text"
@@ -449,7 +417,6 @@
         />
         <q-input
           class="col"
-          borderless
           dense
           v-model="employeeInfo.tin"
           type="text"
@@ -716,7 +683,7 @@ const saveEmployee = () => {
         emergencyInfo: emergencyInfo.value,
       };
       await hr_api.post("profile/create", formData).then((result) => {
-        // emit('closeAddForm');
+        emit('closeAddForm');
         if (result.data.status) {
         }
         $q.notify({
