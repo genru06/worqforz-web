@@ -9,7 +9,7 @@
       <q-btn
         v-if="!hasSystemAccess"
         color="grey-8"
-        label="Register User"
+        label="Register Users"
         @click="generateAccountModal = true"
       />
       <q-btn
