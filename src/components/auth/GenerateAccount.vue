@@ -55,7 +55,7 @@ const constants = useConstants();
 if (constants.departments.length == 0) {
   constants.fetchDepartments();
 }
-// console.log(constants.departments);
+console.log(constants.departments);
 const username = (
   constants.getFirstLetters(prop.basicInfo.firstname) +
   "." +

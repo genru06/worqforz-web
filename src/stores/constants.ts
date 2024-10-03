@@ -24,8 +24,8 @@ export const useConstants = defineStore('contantsStore', {
         this.workplace = response.data;
       })
     },
-    fetchDepartments() {
-      hr_api.get('employee/department/all').then((response) => {
+    async fetchDepartments() {
+      await hr_api.get('employee/department/all').then((response) => {
         LocalStorage.setItem('departments', response.data);
         this.departments = response.data
       })
