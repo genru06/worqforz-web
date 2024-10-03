@@ -52,7 +52,10 @@ const prop = defineProps({
 });
 
 const constants = useConstants();
-console.log(prop.basicInfo);
+if (constants.departments.length == 0) {
+  constants.fetchDepartments();
+}
+// console.log(constants.departments);
 const username = (
   constants.getFirstLetters(prop.basicInfo.firstname) +
   "." +
