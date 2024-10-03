@@ -53,7 +53,6 @@ const prop = defineProps({
 
 const constants = useConstants();
 constants.fetchDepartments();
-console.log(constants.departments);
 const username = (
   constants.getFirstLetters(prop.basicInfo.firstname) +
   "." +
@@ -66,7 +65,9 @@ const roles = prop.basicInfo.employee.roles
   : [];
 const positionOptions = [];
 
-for (const d of constants.departments) {
+const department = LocalStorage.getItem("departments");
+
+for (const d of department) {
   for (const p of d.position) {
     positionOptions.push(p.position);
   }
