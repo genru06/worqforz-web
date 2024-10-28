@@ -8,7 +8,18 @@
         to="/payroll/create"
         label="Create Payroll"
       />
-      <q-btn outline label="HOURLY ENTRY" @click="addManHourDaily = true" />
+      <q-btn
+        outline
+        color="grey-8"
+        label="HOURLY ENTRY"
+        @click="addManHourDaily = true"
+      />
+      <q-btn
+        outline
+        color="grey-8"
+        label="VIEW ATTENDANCE SHEET"
+        @click="attendanceManagementModal = true"
+      />
     </header-layout>
 
     <div class="q-pa-md">
@@ -239,6 +250,42 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="attendanceManagementModal" persistent>
+      <q-card
+        class="my-card q-pa-none"
+        flat
+        style="width: 300px; max-width: 80vw"
+      >
+        <q-bar>
+          <q-icon name="add" />
+          <div>View Attendance Sheet</div>
+          <q-space />
+          <q-btn dense flat icon="close" v-close-popup>
+            <q-tooltip>Close</q-tooltip>
+          </q-btn>
+        </q-bar>
+        <q-card-section>
+          <q-select
+            dense
+            v-model="workplace"
+            :options="workplaceOptions"
+            option-label="name"
+            option-value="id"
+            label="Selet a Workplace"
+          />
+        </q-card-section>
+        <q-card-actions horizontal align="right">
+          <q-btn
+            color="positive"
+            size="sm"
+            label="View"
+            @click="viewAttendance"
+            v-close-popup
+          />
+          <q-btn color="negative" size="sm" label="Cancel" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -248,13 +295,19 @@ import { hr_api } from "../../boot/axios";
 import HourlyEntryForm from "../../components/payroll/HourlyEntryForm.vue";
 import HeaderLayout from "../../layouts/HeaderLayout.vue";
 import { useRoute, useRouter } from "vue-router";
+import { useConstants } from "src/stores/constants";
 
+const constants = useConstants();
 const payrollPeriod = ref();
 const selectedPayrollPeriod = ref();
 const pp = [];
 const ppOptions = ref(pp);
 const manHourDailyDetails = ref();
 const grossPayPerEmployee = [];
+const attendanceManagementModal = ref(false);
+
+const workplaceOptions = ref(constants.workplace);
+const workplace = ref();
 
 const addManHourDaily = ref(false);
 const route = useRoute();
@@ -316,6 +369,10 @@ const loadPage = async () => {
     payrollPeriod.value = selectedPayrollPeriod.value;
     fetchManHourDaily(payrollPeriod.value);
   }
+};
+
+const viewAttendance = () => {
+  router.push("/attendance/dts/" + workplace.value.id);
 };
 
 loadPage();
