@@ -373,6 +373,7 @@ const loadPage = async () => {
 
 const viewAttendance = () => {
   router.push("/attendance/dts/" + workplace.value.id);
+  // console.log(workplace.value);
 };
 
 loadPage();
