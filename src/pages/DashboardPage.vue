@@ -16,6 +16,9 @@ import { useRoute, useRouter } from "vue-router";
 // import { useUserStore } from "../stores/user-store";
 // import { useAttendanceStore } from "../stores/attendance";
 
+const constants = useConstants();
+constants.fetchAllWorkplace();
+constants.fetchDepartments();
 const user = LocalStorage.getItem("user");
 if (user.roles != "SUPER") {
   const is_tl = user.profile.employee.is_tl;
@@ -23,14 +26,9 @@ if (user.roles != "SUPER") {
 
   if (is_tl) {
     router.push("/dashboard/time-keeper");
-  } else {
-    constants.fetchAllWorkplace();
-    constants.fetchDepartments();
   }
   console.log("is tl : ", is_tl);
 }
-
-const constants = useConstants();
 </script>
 
 <style lang="scss" scoped>
