@@ -103,29 +103,34 @@
               :key="c.name"
               :props="props"
               :class="getColumnClass(c)"
-            >
-              <div v-if="c.name != 'actions'">
-                {{ props.row[c.name] || 0 }}
-                <q-popup-edit
-                  v-if="c.classes == 'editable'"
+              ><div v-if="c.name != 'actions'">
+                <span v-if="c.classes != 'editable'">{{
+                  props.row[c.name] || 0
+                }}</span>
+                <q-input
+                  v-if="c.classes == 'editable' && !props.row.status"
                   v-model="props.row[c.name]"
-                  auto-save
-                  v-slot="scope"
-                  anchor="top left"
+                  input-style="text-align: right"
+                  dense
+                  borderless
+                  autofocus
+                  @focus="(input) => select(input)"
+                  @keyup.enter="
+                    changeDetails(
+                      c.name,
+                      props.row[c.name],
+                      props.row.profile_id,
+                      props.row.id
+                    )
+                  "
                 >
-                  <div class="text-italic text-primary">
-                    {{ c.label }}
-                  </div>
-                  <q-input
-                    v-model="scope.value"
-                    dense
-                    autofocus
-                    @keyup.enter="
-                      scope.set,
-                        changeDetails(c.name, scope.value, props.row.profile_id)
-                    "
-                  />
-                </q-popup-edit>
+                  <q-tooltip>
+                    Input an amount and press enter to save
+                  </q-tooltip>
+                </q-input>
+                <span v-if="c.classes == 'editable' && props.row.status">{{
+                  props.row[c.name] || 0
+                }}</span>
               </div>
               <div v-if="c.name == 'actions'">
                 <q-btn
@@ -203,8 +208,14 @@ const columns = ref();
 
 let sssTable = ref([]);
 
-const changeDetails = async (name, row, user_id) => {
-  calculatePayroll(row, name, user_id);
+const changeDetails = async (name, row, user_id, rowid) => {
+  console.log("rowValue : ", row, rowid);
+  calculatePayroll(row, name, user_id, tablerows.value[rowid][name], rowid);
+};
+const select = (input) => {
+  setTimeout(() => {
+    input.target.select();
+  }, 10);
 };
 
 const generatePayrollReport = () => {
@@ -405,94 +416,141 @@ const getPayrollReport = async (offset = 0, limit = 15, page = 1) => {
     });
 };
 
-const calculatePayroll = async (r = null, name = null, user_id = null) => {
+const calculatePayroll = async (
+  r = null,
+  name = null,
+  user_id = null,
+  value = null,
+  rowid = null
+) => {
   console.log("calculating...");
-  tablerows.value = [];
-  let count = 0;
-  for (let res of payrollReport) {
-    let charges = {};
-    charges["status"] = res.status;
-    charges["id"] = count;
 
-    count++;
-    if (count <= 15) {
-      let val = [];
-      let deductions = 0;
-      if (!res.status) {
-        let statBen = await getStatBen(
-          res.payrollPeriod.per_id,
-          res.profile.user_id,
-          res.profile.employee.workplace.id,
-          res.gross_pay,
-          res.profile.employee.salary
-        );
-        if (process.env.COOP_URL != "NONE") {
-          let coopDeduction = await fetchCoopDeduction(res.profile.user_id);
-          charges["coopDeduction"] = coopDeduction.data;
-          const loanBalances = coopDeduction.data.balances;
-          if (coopDeduction.data.cad_share_capital < 5000) {
-            val["share_capital"] = 200;
-          }
-          for (const lb of loanBalances) {
-            if (lb.status == 2) {
-              val[lb.loanName] = lb.balanceDue;
+  tableLoading.value = true;
+  if (!r) {
+    tablerows.value = [];
+    let count = 0;
+    for (let res of payrollReport) {
+      let charges = {};
+      charges["status"] = res.status;
+      charges["id"] = count;
+
+      count++;
+      if (count <= 15) {
+        let val = [];
+        let deductions = 0;
+        if (!res.status) {
+          let statBen = await getStatBen(
+            res.payrollPeriod.per_id,
+            res.profile.user_id,
+            res.profile.employee.workplace.id,
+            res.gross_pay,
+            res.profile.employee.salary
+          );
+          if (process.env.COOP_URL != "NONE") {
+            let coopDeduction = await fetchCoopDeduction(res.profile.user_id);
+            charges["coopDeduction"] = coopDeduction.data;
+            const loanBalances = coopDeduction.data.balances;
+            if (coopDeduction.data.cad_share_capital < 5000) {
+              val["share_capital"] = 200;
             }
+            for (const lb of loanBalances) {
+              if (lb.status == 2) {
+                val[lb.loanName] = lb.balanceDue;
+              }
+            }
+          }
+
+          val["sss"] = statBen.data.sss;
+          val["philhealth"] = statBen.data.ph.toFixed(2);
+          val["pag_ibig"] = statBen.data.pagIbig.toFixed(2);
+        }
+
+        charges["profile_id"] = res.profile.user_id;
+        charges["name"] = res.profile.lastname + ", " + res.profile.firstname;
+        charges["position"] = res.profile.employee
+          ? res.profile.employee.position.position
+          : "";
+        charges["gross_pay"] = constants.numberWithCommas(res.gross_pay);
+
+        for (let c of columns.value) {
+          let field = c.field;
+          if (
+            field != "name" &&
+            field != "position" &&
+            field != "gross_pay" &&
+            field != "net_pay" &&
+            field != "actions" &&
+            field != "deductions"
+          ) {
+            charges[field] = val[field] || "0.00";
+            deductions += parseFloat(val[field] || 0);
           }
         }
 
-        val["sss"] = statBen.data.sss;
-        val["philhealth"] = statBen.data.ph.toFixed(2);
-        val["pag_ibig"] = statBen.data.pagIbig.toFixed(2);
+        if (process.env.COOP_URL != "NONE") {
+          if (charges["share_capital"] != 0 && !res.status) {
+            charges["coopDeduction"]["share_capital"] =
+              charges["share_capital"];
+          }
+        }
+        charges["deductions"] = deductions.toFixed(2);
+        charges["net_pay"] = constants.numberWithCommas(
+          (parseFloat(res.gross_pay) - parseFloat(deductions)).toFixed(2)
+        );
+
+        if (res.status) {
+          for (const d in res.details) {
+            charges[d] = res.details[d];
+            charges["status"] = res.status;
+          }
+        }
+        charges["teller"] = user.id;
+
+        tablerows.value.push(charges);
       }
+    }
+  } else {
+    console.log("table rows : ", tablerows.value);
+    const rowDetails = payrollReport.filter(
+      (v) => v.profile.user_id == user_id
+    )[0];
+    console.log("name :", rowid);
 
-      charges["profile_id"] = res.profile.user_id;
-      charges["name"] = res.profile.lastname + ", " + res.profile.firstname;
-      charges["position"] = res.profile.employee
-        ? res.profile.employee.position.position
-        : "";
-      charges["gross_pay"] = constants.numberWithCommas(res.gross_pay);
-
-      for (let c of columns.value) {
-        let field = c.field;
+    if (!rowDetails.status) {
+      const rows = tablerows.value;
+      const row = rows[rowid];
+      let deductions = 0;
+      for (const rw in row) {
+        let field = rw;
         if (
           field != "name" &&
           field != "position" &&
           field != "gross_pay" &&
           field != "net_pay" &&
+          field != "id" &&
+          field != "actions" &&
+          field != "profile_id" &&
+          field != "status" &&
+          field != "teller" &&
           field != "deductions"
         ) {
-          if (name != null && field == name && res.profile.user_id == user_id) {
-            charges[field] = r;
-            val[field] = parseFloat(r);
-          } else {
-            charges[field] = val[field];
-          }
-          deductions += parseFloat(val[field]) || 0;
+          console.log(rw, row[rw]);
+          deductions += parseFloat(row[rw] || 0);
         }
       }
-
-      if (process.env.COOP_URL != "NONE") {
-        if (charges["share_capital"] != 0 && !res.status) {
-          charges["coopDeduction"]["share_capital"] = charges["share_capital"];
-        }
-      }
-      charges["deductions"] = deductions.toFixed(2);
-      charges["net_pay"] = constants.numberWithCommas(
-        (parseFloat(res.gross_pay) - parseFloat(deductions)).toFixed(2)
+      tablerows.value[rowid][name] = constants.numberWithCommas(
+        parseFloat(value).toFixed(2)
       );
-
-      if (res.status) {
-        for (const d in res.details) {
-          charges[d] = res.details[d];
-          charges["status"] = res.status;
-        }
-      }
-      charges["teller"] = user.id;
-
-      tablerows.value.push(charges);
+      tablerows.value[rowid].deductions = constants.numberWithCommas(
+        deductions.toFixed(2)
+      );
+      tablerows.value[rowid].net_pay = constants.numberWithCommas(
+        (parseFloat(rowDetails.gross_pay) - deductions).toFixed(2)
+      );
+      console.log("deductions : ", deductions);
+      console.log("netPay : ", tablerows.value[rowid].net_pay);
     }
   }
-  console.log(tablerows.value);
 
   tableLoading.value = false;
 };
