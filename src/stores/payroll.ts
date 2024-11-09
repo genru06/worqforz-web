@@ -57,7 +57,8 @@ export const usePayrollStore = defineStore('payrollStore', {
             field: response.data[r].columns,
             classes: 'editable',
             formula: response.data[r].formula,
-            category: response.data[r].category
+            category: response.data[r].category,
+            headerStyle: 'min-width:100px !important'
           });
         }
 
@@ -89,7 +90,7 @@ export const usePayrollStore = defineStore('payrollStore', {
 
     async getCharges(ppId, profileId, workplace, grossPay) {
       const statBen = await hr_api.get('payroll/statBen' + ppId + '/' + profileId + '/' + workplace + '/' + grossPay).then()
-      console.log(statBen)
+      // console.log(statBen)
     }
   }
 });
