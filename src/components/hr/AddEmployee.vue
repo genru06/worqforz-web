@@ -195,7 +195,6 @@
           @filter="getReligion"
           label="Select Religion"
           bg-color="white"
-          :rules="[(val) => val || 'Please Select a Religion']"
         >
           <template v-slot:no-option>
             <q-item>

@@ -12,6 +12,32 @@
         label="Add Employee"
       />
       <q-btn outline color="grey-8" to="/settings" label="Settings" />
+
+      <q-btn-dropdown
+        outline
+        auto-close
+        rounded
+        color="primary"
+        :label="wLabel"
+      >
+        <!-- dropdown content goes here -->
+        <q-list padding style="width: 350px">
+          <q-item
+            v-for="w of workplace"
+            :key="w.id"
+            clickable
+            @click="getAllProfileByWorkplace(w.id, w.name)"
+          >
+            <q-item-section>
+              <q-item-label>{{ w.name }}</q-item-label>
+              <!-- <q-item-label caption>February 22, 2016</q-item-label> -->
+            </q-item-section>
+            <q-item-section side>
+              <q-icon name="info" color="amber" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-btn-dropdown>
     </header-layout>
     <div class="q-pa-md">
       <q-dialog v-model="employeeForm" persistent transition-show="scale">
@@ -119,6 +145,8 @@ const totalSuspendedEmployees = ref(0);
 const totalResignedEmployees = ref(0);
 const totalDeactivatedEmployees = ref(0);
 const tab = ref("activeEmployees");
+const workplace = ref(LocalStorage.getItem("workplace"));
+const wLabel = ref("Workplace");
 
 const submitting = ref(false);
 const employeeForm = ref(false);
@@ -127,6 +155,12 @@ const submitForm = ref(false);
 const addEmployeeForm = ref();
 const filteredSortedRows = ref();
 const profileList = ref();
+
+const getAllProfileByWorkplace = (workplace_id, wname) => {
+  profileList.value = workplace_id;
+  wLabel.value = wname;
+  console.log(profileList.value);
+};
 
 const onSubmitForm = () => {
   addEmployeeForm.value.addEmployee();

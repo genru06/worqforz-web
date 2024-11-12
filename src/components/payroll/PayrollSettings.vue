@@ -92,7 +92,7 @@
                 icon="add"
                 dense
                 label="Add A Schedule"
-                @click="addItemModal = true"
+                @click="addDeductModal = true"
               />
             </template>
             <template v-slot:body-cell-id>
@@ -166,18 +166,145 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="addDeductModal">
+      <q-card style="width: 350px">
+        <q-bar dark class="bg-primary text-white">
+          <div class="col text-left text-weight-bold">Add a Schedule</div>
+          <q-space />
+          <q-btn
+            dense
+            flat
+            round
+            icon="close"
+            size="8.5px"
+            color="white"
+            v-close-popup
+          />
+        </q-bar>
+        <q-card-section class="q-py-none row">
+          <q-select
+            class="q-pa-none col"
+            dense
+            use-input
+            hide-selected
+            fill-input
+            input-debounce="0"
+            v-model="formInput.profile"
+            :options="profileOptions"
+            @filter="profileFn"
+            :option-label="(v) => v.name"
+            :option-value="(v) => v.user_id"
+            label="Search Employee"
+            bg-color="white"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey"> No results </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </q-card-section>
+        <q-card-section class="row q-py-none">
+          <q-select
+            class="col"
+            v-model="formInput.payroll_item"
+            :options="payrollItems"
+            label="Payroll Item"
+            :option-label="(v) => v.pi_item_name"
+            :option-value="(v) => v.pi_item_id"
+            dense
+          />
+        </q-card-section>
+        <q-card-section class="q-py-none row">
+          <q-input
+            dense
+            class="col"
+            v-model="formInput.startDate"
+            label="Start Date"
+            mask="date"
+          >
+            <template v-slot:append>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy
+                  cover
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date v-model="formInput.startDate">
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </q-card-section>
+        <q-card-section class="q-py-none row">
+          <q-input
+            dense
+            type="number"
+            class="col"
+            v-model="formInput.amount"
+            label="Amount"
+          />
+        </q-card-section>
+        <q-card-section class="q-py-none row">
+          <q-input
+            dense
+            type="number"
+            class="col"
+            v-model="formInput.frequency"
+            label="Frequency"
+          />
+        </q-card-section>
+        <q-card-section class="q-pt-none row">
+          <q-input
+            dense
+            type="number"
+            class="col"
+            v-model="formInput.months"
+            label="Months"
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            label="Clear"
+            type="reset"
+            color="primary"
+            flat
+            class="q-ml-sm"
+          />
+          <q-btn
+            :loading="submitting"
+            label="Save"
+            type="submit"
+            color="primary"
+            @click="submitAddDeductSchedule"
+          >
+            <template v-slot:loading>
+              <q-spinner-facebook />
+            </template>
+          </q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script setup>
+import { date } from "quasar";
 import { hr_api } from "src/boot/axios";
 import { ref } from "vue";
 
-const tab = ref("items");
+const tab = ref("sched");
 const actionType = ref("ADD");
 const addItemModal = ref(false);
+const addDeductModal = ref(false);
 const itemRows = ref([]);
 const scheduleRows = ref([]);
+const submitting = ref(false);
 const pagination = ref({
   sortBy: "desc",
   descending: false,
@@ -185,6 +312,51 @@ const pagination = ref({
   rowsPerPage: 15,
   // rowsNumber: xx if getting data from a server
 });
+
+const profile = [];
+const profileOptions = ref(profile);
+
+const payrollItems = ref();
+
+const formInput = ref({
+  profile: {
+    name: "",
+  },
+  payroll_item: "",
+  amount: "0.00",
+  startDate: date.formatDate("YYYY-MM-DD", Date.now()),
+  frequency: 0,
+  months: 0,
+});
+
+const submitAddDeductSchedule = async () => {
+  console.log(formInput.value);
+  await hr_api
+    .post("payroll/save/add-deduct-sched", formInput.value)
+    .then((response) => {
+      console.log(response.data);
+      loadAddDeductSchedule();
+    });
+};
+
+const profileFn = async (val, update, abort) => {
+  if (profile.length == 0) {
+    await hr_api.get("profile/all/1").then((response) => {
+      for (const c of response.data) {
+        profile.push({
+          user_id: c.user_id,
+          name: c.lastname + (c.lastname ? ", " : "") + c.firstname,
+        });
+      }
+    });
+  }
+  update(() => {
+    const needle = val.toLowerCase();
+    profileOptions.value = profile.filter(
+      (v) => v.name.toLowerCase().indexOf(needle) > -1
+    );
+  });
+};
 
 const itemForm = ref({
   pi_item_name: "",
@@ -215,27 +387,39 @@ const scheduleColumns = [
     field: "id",
   },
   {
-    name: "payrollItem",
+    name: "employee",
     required: true,
-    label: "Item Name",
+    label: "Employee",
     align: "left",
-    field: "payrollItem",
-    format: (val) => val.pi_item_name,
+    field: "employee",
   },
   {
-    name: "frequency",
+    name: "item_id",
     required: true,
-    label: "Frequency",
+    label: "Item",
     align: "left",
-    field: "frequency",
-    format: (val) => (val.frequency == 0 ? "Daily" : "Weekly"),
+    field: "item_id",
   },
   {
-    name: "week_day",
+    name: "amount",
     required: true,
-    label: "Week No. / Day",
+    label: "Amount",
     align: "center",
-    field: "week_day",
+    field: "amount",
+  },
+  {
+    name: "startDate",
+    required: true,
+    label: "Start Date",
+    align: "center",
+    field: "startDate",
+  },
+  {
+    name: "months",
+    required: true,
+    label: "No of Months",
+    align: "center",
+    field: "months",
   },
   {
     name: "actions",
@@ -309,6 +493,7 @@ const columns = [
 const loadPayrollItems = async () => {
   await hr_api.get("payroll/items/all").then((response) => {
     itemRows.value = response.data;
+    payrollItems.value = response.data;
   });
 };
 

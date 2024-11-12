@@ -146,7 +146,7 @@
 
 <script setup>
 import { LocalStorage, date, useQuasar } from "quasar";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { hr_api } from "../../boot/axios";
 const confirm = ref(false);
 const fromDate = ref();
@@ -161,10 +161,7 @@ const props = defineProps({
     type: Number,
     default: 1,
   },
-  profiles: {
-    type: Number,
-    default: 0,
-  },
+  profiles: Number,
 });
 
 const separator = ref("horizontal");
@@ -291,10 +288,12 @@ const loadData = () => {
     });
 };
 
-const getAllProfileByWorkplace = async () => {
+const getAllProfileByWorkplace = async (workplace_id = null) => {
   loading.value = true;
   await hr_api
-    .get("/profile/all/workplace/" + emStatus.value)
+    .get(
+      "/profile/all/workplace/" + emStatus.value + "/" + (workplace_id || "")
+    )
     .then((response) => {
       tablerows.value = response.data;
       rows.value = response.data;
@@ -312,6 +311,13 @@ const getAllProfileByWorkplace = async () => {
 };
 
 getAllProfileByWorkplace();
+watch(
+  () => props.profiles,
+  async (newValue) => {
+    console.log("workplace", newValue);
+    getAllProfileByWorkplace(newValue);
+  }
+);
 </script>
 
 <style lang="scss" scoped></style>
