@@ -145,7 +145,8 @@
                     changeDetails(
                       c.name,
                       props.row[c.name],
-                      props.row.profile_id
+                      props.row.profile_id,
+                      props.row.id
                     )
                   "
                 />
@@ -260,9 +261,9 @@ const columns = ref();
 
 let sssTable = ref([]);
 
-const changeDetails = async (name, row, user_id) => {
-  // console.log("rowValue : ", tablerows.value[row][name]);
-  calculatePayroll(row, name, user_id, tablerows.value[row][name]);
+const changeDetails = async (name, row, user_id, rowid) => {
+  console.log("rowValue : ", row, rowid);
+  calculatePayroll(row, name, user_id, tablerows.value[rowid][name], rowid);
 };
 
 const setTableTitle = async (details) => {
@@ -457,7 +458,8 @@ const calculatePayroll = async (
   r = null,
   name = null,
   user_id = null,
-  value = null
+  value = null,
+  rowid = null
 ) => {
   console.log("calculating...", r, user_id);
 
@@ -564,7 +566,7 @@ const calculatePayroll = async (
 
     if (!rowDetails.status) {
       const rows = tablerows.value;
-      const row = rows[r];
+      const row = rows[rowid];
       let deductions = 0;
       for (const rw in row) {
         // console.log(rw, row[rw]);
@@ -584,17 +586,17 @@ const calculatePayroll = async (
           deductions += parseFloat(row[rw]);
         }
       }
-      tablerows.value[r][name] = constants.numberWithCommas(
+      tablerows.value[rowid][name] = constants.numberWithCommas(
         parseFloat(value).toFixed(2)
       );
-      tablerows.value[r].deductions = constants.numberWithCommas(
+      tablerows.value[rowid].deductions = constants.numberWithCommas(
         deductions.toFixed(2)
       );
-      tablerows.value[r].net_pay = constants.numberWithCommas(
+      tablerows.value[rowid].net_pay = constants.numberWithCommas(
         (parseFloat(rowDetails.gross_pay) - deductions).toFixed(2)
       );
       console.log("deductions : ", deductions);
-      console.log("netPay : ", tablerows.value[r].net_pay);
+      console.log("netPay : ", tablerows.value[rowid].net_pay);
     }
   }
   tableLoading.value = false;
