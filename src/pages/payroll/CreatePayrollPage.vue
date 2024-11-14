@@ -489,13 +489,16 @@ const calculatePayroll = async (
             res.payrollPeriod.per_to
           );
           charges["coopDeduction"] = coopDeduction.data;
-          const loanBalances = coopDeduction.data.balances;
-          if (coopDeduction.data.shareCapital.deposits < 5000) {
-            val["share_capital"] = 200;
-          }
-          for (const lb of loanBalances) {
-            if (lb.status == 2) {
-              val[lb.loanName] = lb.balanceDue;
+          if (coopDeduction.data) {
+            const loanBalances = coopDeduction.data.balances;
+            if (coopDeduction.data.shareCapital.deposits < 5000) {
+              val["share_capital"] = 200;
+            }
+
+            for (const lb of loanBalances) {
+              if (lb.status == 2) {
+                val[lb.loanName] = lb.balanceDue;
+              }
             }
           }
           val["sss"] = statBen.data.sss;
