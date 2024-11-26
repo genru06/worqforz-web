@@ -138,6 +138,7 @@
                 <q-input
                   v-if="c.classes == 'editable'"
                   v-model="props.row[c.name]"
+                  class="text-right"
                   dense
                   borderless
                   autofocus
