@@ -55,7 +55,7 @@ export const usePayrollStore = defineStore('payrollStore', {
             label: response.data[r].label,
             align: 'right',
             field: response.data[r].columns,
-            classes: 'editable text-right',
+            classes: 'editable',
             formula: response.data[r].formula,
             category: response.data[r].category,
             headerStyle: 'min-width:100px !important'
