@@ -1,7 +1,15 @@
 <template>
   <div>
-    <header-layout mainTitle="PAYROLL" moduleTitle="Man Hours Daily">
-      <q-btn outline color="grey-8" to="/dashboard" label="Dashboard" />
+    <header-layout
+      mainTitle="PAYROLL"
+      moduleTitle="Man Hours Daily"
+    >
+      <q-btn
+        outline
+        color="grey-8"
+        to="/dashboard"
+        label="Dashboard"
+      />
       <q-btn
         outline
         color="grey-8"
@@ -23,10 +31,17 @@
     </header-layout>
 
     <div class="q-pa-md">
-      <q-markup-table dense separator="cell" flat>
+      <q-markup-table
+        dense
+        separator="cell"
+        flat
+      >
         <thead>
           <tr>
-            <th style="border: none !important" colspan="3">
+            <th
+              style="border: none !important"
+              colspan="3"
+            >
               <q-select
                 class="q-pb-none col-lg-md"
                 outlined
@@ -38,15 +53,14 @@
                 input-debounce="0"
                 :options="ppOptions"
                 @filter="payrollPeriodFn"
-                :option-label="
-                  (v) =>
-                    v.per_from +
-                    ' - ' +
-                    v.per_to +
-                    '( week ' +
-                    v.per_week_no +
-                    ' )'
-                "
+                :option-label="(v) =>
+                  v.per_from +
+                  ' - ' +
+                  v.per_to +
+                  '( week ' +
+                  v.per_week_no +
+                  ' )'
+                  "
                 option-value="id"
                 @update:model-value="(v) => fetchManHourDaily(v)"
                 label="Payroll Period :"
@@ -62,8 +76,14 @@
                 </template>
               </q-select>
             </th>
-            <th style="border: none !important" colspan="22"></th>
-            <th style="border: none !important" colspan="3">
+            <th
+              style="border: none !important"
+              colspan="22"
+            ></th>
+            <th
+              style="border: none !important"
+              colspan="3"
+            >
               <q-select
                 class="q-pb-none col-8"
                 dense
@@ -106,14 +126,26 @@
               Days of Work
             </td>
             <!-- <td style="vertical-align: middle; width:5%; text-align: center" rowspan="2" class="font-weight-bold">COLA</td> -->
-            <td class="text-center font-weight-bold" colspan="6">OVERTIME</td>
-            <td class="text-center font-weight-bold" colspan="6">
+            <td
+              class="text-center font-weight-bold"
+              colspan="6"
+            >OVERTIME</td>
+            <td
+              class="text-center font-weight-bold"
+              colspan="6"
+            >
               OT NIGHT DIFF
             </td>
-            <td class="text-center font-weight-bold" colspan="6">
+            <td
+              class="text-center font-weight-bold"
+              colspan="6"
+            >
               NIGHT DIFFERENTIAL
             </td>
-            <td class="text-center font-weight-bold" colspan="4">HOLIDAYS</td>
+            <td
+              class="text-center font-weight-bold"
+              colspan="4"
+            >HOLIDAYS</td>
             <td
               style="vertical-align: middle; width: 10%; text-align: center"
               rowspan="2"
@@ -134,17 +166,50 @@
             </td>
           </tr>
           <tr>
-            <td class="text-center" colspan="2">REG OT</td>
-            <td class="text-center" colspan="2">SHD OT</td>
-            <td class="text-center" colspan="2">RHD OT</td>
-            <td class="text-center" colspan="2">REG</td>
-            <td class="text-center" colspan="2">SHD</td>
-            <td class="text-center" colspan="2">RHD</td>
-            <td class="text-center" colspan="2">REG</td>
-            <td class="text-center" colspan="2">SHD</td>
-            <td class="text-center" colspan="2">RHD</td>
-            <td class="text-center" colspan="2">SHD</td>
-            <td class="text-center" colspan="2">RHD</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >REG OT</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >SHD OT</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >RHD OT</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >REG</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >SHD</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >RHD</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >REG</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >SHD</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >RHD</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >SHD</td>
+            <td
+              class="text-center"
+              colspan="2"
+            >RHD</td>
           </tr>
           <tr class="daysAmountHeader">
             <td class="text-center">Days</td>
@@ -179,7 +244,7 @@
           <tr
             class="tableOver"
             v-for="mhd in manHourDailyDetails"
-            :key="mhd.id"
+            :key="mhd.pdh_emp_id"
           >
             <td>{{ mhd.profile_lastname + ", " + mhd.profile_firstname }}</td>
             <td>{{ (parseFloat(mhd.reg_hours) / 8).toFixed(1) }}</td>
@@ -211,18 +276,18 @@
               {{
                 getGrossPay(
                   parseFloat(mhd.reg_amt || 0) +
-                    parseFloat(mhd.ot_reg_amt || 0) +
-                    parseFloat(mhd.ot_sp_amt || 0) +
-                    parseFloat(mhd.ot_hd_amt || 0) +
-                    parseFloat(mhd.otnd_reg_amt || 0) +
-                    parseFloat(mhd.otnd_sp_amt || 0) +
-                    parseFloat(mhd.otnd_hd_amt || 0) +
-                    parseFloat(mhd.nd_reg_amt || 0) +
-                    parseFloat(mhd.nd_sp_amt || 0) +
-                    parseFloat(mhd.nd_hd_amt || 0) +
-                    parseFloat(mhd.hd_sp_amt || 0) +
-                    parseFloat(mhd.hd_reg_amt || 0) +
-                    parseFloat(mhd.sd_amt || 0),
+                  parseFloat(mhd.ot_reg_amt || 0) +
+                  parseFloat(mhd.ot_sp_amt || 0) +
+                  parseFloat(mhd.ot_hd_amt || 0) +
+                  parseFloat(mhd.otnd_reg_amt || 0) +
+                  parseFloat(mhd.otnd_sp_amt || 0) +
+                  parseFloat(mhd.otnd_hd_amt || 0) +
+                  parseFloat(mhd.nd_reg_amt || 0) +
+                  parseFloat(mhd.nd_sp_amt || 0) +
+                  parseFloat(mhd.nd_hd_amt || 0) +
+                  parseFloat(mhd.hd_sp_amt || 0) +
+                  parseFloat(mhd.hd_reg_amt || 0) +
+                  parseFloat(mhd.sd_amt || 0),
                   mhd.pdh_emp_id
                 )
               }}
@@ -231,7 +296,10 @@
         </tbody>
       </q-markup-table>
     </div>
-    <q-dialog v-model="addManHourDaily" persistent>
+    <q-dialog
+      v-model="addManHourDaily"
+      persistent
+    >
       <q-card
         class="my-card q-pa-none"
         flat
@@ -241,7 +309,12 @@
           <q-icon name="add" />
           <div>Payroll Daily Entry</div>
           <q-space />
-          <q-btn dense flat icon="close" v-close-popup>
+          <q-btn
+            dense
+            flat
+            icon="close"
+            v-close-popup
+          >
             <q-tooltip>Close</q-tooltip>
           </q-btn>
         </q-bar>
@@ -250,7 +323,10 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-    <q-dialog v-model="attendanceManagementModal" persistent>
+    <q-dialog
+      v-model="attendanceManagementModal"
+      persistent
+    >
       <q-card
         class="my-card q-pa-none"
         flat
@@ -260,7 +336,12 @@
           <q-icon name="add" />
           <div>View Attendance Sheet</div>
           <q-space />
-          <q-btn dense flat icon="close" v-close-popup>
+          <q-btn
+            dense
+            flat
+            icon="close"
+            v-close-popup
+          >
             <q-tooltip>Close</q-tooltip>
           </q-btn>
         </q-bar>
@@ -274,7 +355,10 @@
             label="Selet a Workplace"
           />
         </q-card-section>
-        <q-card-actions horizontal align="right">
+        <q-card-actions
+          horizontal
+          align="right"
+        >
           <q-btn
             color="positive"
             size="sm"
@@ -282,7 +366,12 @@
             @click="viewAttendance"
             v-close-popup
           />
-          <q-btn color="negative" size="sm" label="Cancel" v-close-popup />
+          <q-btn
+            color="negative"
+            size="sm"
+            label="Cancel"
+            v-close-popup
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -290,112 +379,131 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { hr_api } from "../../boot/axios";
-import HourlyEntryForm from "../../components/payroll/HourlyEntryForm.vue";
-import HeaderLayout from "../../layouts/HeaderLayout.vue";
-import { useRoute, useRouter } from "vue-router";
-import { useConstants } from "src/stores/constants";
+  import { ref } from "vue";
+  import { hr_api } from "../../boot/axios";
+  import HourlyEntryForm from "../../components/payroll/HourlyEntryForm.vue";
+  import HeaderLayout from "../../layouts/HeaderLayout.vue";
+  import { useRoute, useRouter } from "vue-router";
+  import { useConstants } from "src/stores/constants";
 
-const constants = useConstants();
-const payrollPeriod = ref();
-const selectedPayrollPeriod = ref();
-const pp = [];
-const ppOptions = ref(pp);
-const manHourDailyDetails = ref();
-const grossPayPerEmployee = [];
-const attendanceManagementModal = ref(false);
+  const constants = useConstants();
+  const payrollPeriod = ref();
+  const selectedPayrollPeriod = ref();
+  const pp = [];
+  const ppOptions = ref(pp);
+  const manHourDailyDetails = ref();
+  const grossPayPerEmployee = [];
+  const attendanceManagementModal = ref(false);
 
-const workplaceOptions = ref(constants.workplace);
-const workplace = ref();
+  const workplaceOptions = ref(constants.workplace);
+  const workplace = ref();
 
-const addManHourDaily = ref(false);
-const route = useRoute();
-const router = useRouter();
+  const addManHourDaily = ref(false);
+  const route = useRoute();
+  const router = useRouter();
 
-const payrollPeriodFn = async (val, update, abort) => {
-  if (pp.length == 0) {
+  const payrollPeriodFn = async (val, update, abort) => {
+    if (pp.length == 0) {
+      await hr_api.get("payroll/getPP").then((response) => {
+        for (const c in response.data) {
+          pp.push(response.data[c]);
+        }
+      });
+    }
+
+    update(() => {
+      const needle = val.toLowerCase();
+      ppOptions.value = pp.filter(
+        (v) => v.per_from.toLowerCase().indexOf(needle) > -1
+      );
+    });
+  };
+
+  const getGrossPay = (details, emp_id) => {
+    const payReportDetails = {
+      profile: emp_id,
+      payrollPeriod: selectedPayrollPeriod.value.per_id,
+      gross_pay: details.toFixed(2),
+    };
+    grossPayPerEmployee.push(payReportDetails);
+    return numberWithCommas(details.toFixed(2));
+  };
+
+  const fetchManHourDaily = async (v) => {
+    selectedPayrollPeriod.value = v;
+    router.push("/payroll/man-hours/" + v.per_id);
+    await hr_api.get("payroll/man-hours/all/" + v.per_id).then(async (response) => {
+      manHourDailyDetails.value = response.data;
+      const empDetails = []
+      let totalHoursOT = 0;
+      await hr_api.get("attendance/ot/details/" + v.per_id).then(res => {
+        for (const r of res.data) {
+          let otHours = constants.calculateHoursSpent(r.time_in, r.time_out);
+          const eIndex = manHourDailyDetails.value.findIndex(v => v.pdh_emp_id == r.employee.user_id);
+          // 
+          console.log('index :', eIndex);
+          totalHoursOT = totalHoursOT + otHours;
+          manHourDailyDetails.value[eIndex].ot_reg = totalHoursOT;
+          manHourDailyDetails.value[eIndex].ot_reg_amt = ((parseFloat(r.employee.employee.salary) * 1.25) / 8) * totalHoursOT;
+
+        }
+
+      })
+    });
+    console.log(grossPayPerEmployee);
+
+    await hr_api
+      .post("payroll/save-to-report", grossPayPerEmployee)
+      .then((response) => {
+        console.log(response);
+      });
+  };
+
+  const loadPage = async () => {
     await hr_api.get("payroll/getPP").then((response) => {
       for (const c in response.data) {
         pp.push(response.data[c]);
       }
     });
-  }
 
-  update(() => {
-    const needle = val.toLowerCase();
-    ppOptions.value = pp.filter(
-      (v) => v.per_from.toLowerCase().indexOf(needle) > -1
-    );
-  });
-};
-
-const getGrossPay = (details, emp_id) => {
-  const payReportDetails = {
-    profile: emp_id,
-    payrollPeriod: selectedPayrollPeriod.value.per_id,
-    gross_pay: details.toFixed(2),
-  };
-  grossPayPerEmployee.push(payReportDetails);
-  return numberWithCommas(details.toFixed(2));
-};
-
-const fetchManHourDaily = async (v) => {
-  selectedPayrollPeriod.value = v;
-  router.push("/payroll/man-hours/" + v.per_id);
-  await hr_api.get("payroll/man-hours/all/" + v.per_id).then((response) => {
-    manHourDailyDetails.value = response.data;
-  });
-  console.log(grossPayPerEmployee);
-
-  await hr_api
-    .post("payroll/save-to-report", grossPayPerEmployee)
-    .then((response) => {
-      console.log(response);
-    });
-};
-const loadPage = async () => {
-  await hr_api.get("payroll/getPP").then((response) => {
-    for (const c in response.data) {
-      pp.push(response.data[c]);
+    if (route.params["payrollPeriod"]) {
+      console.log(route.params["payrollPeriod"]);
+      selectedPayrollPeriod.value = pp.filter(
+        (v) => v.per_id == route.params["payrollPeriod"]
+      )[0];
+      payrollPeriod.value = selectedPayrollPeriod.value;
+      fetchManHourDaily(payrollPeriod.value);
     }
-  });
+  };
 
-  if (route.params["payrollPeriod"]) {
-    console.log(route.params["payrollPeriod"]);
-    selectedPayrollPeriod.value = pp.filter(
-      (v) => v.per_id == route.params["payrollPeriod"]
-    )[0];
-    payrollPeriod.value = selectedPayrollPeriod.value;
-    fetchManHourDaily(payrollPeriod.value);
-  }
-};
+  const viewAttendance = () => {
+    router.push("/attendance/dts/" + workplace.value.id);
+    // console.log(workplace.value);
+  };
 
-const viewAttendance = () => {
-  router.push("/attendance/dts/" + workplace.value.id);
-  // console.log(workplace.value);
-};
+  loadPage();
 
-loadPage();
-
-const numberWithCommas = (x) => {
-  if (x == null) {
-    x = 0;
-  }
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+  const numberWithCommas = (x) => {
+    if (x == null) {
+      x = 0;
+    }
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 </script>
 
 <style lang="scss" scoped>
-td,
-th {
-  border: 1px solid grey !important;
-  text-align: center;
-}
-td.text-left {
-  text-align: left;
-}
-tr.tableOver:hover {
-  background-color: aquamarine;
-}
+
+  td,
+  th {
+    border: 1px solid grey !important;
+    text-align: center;
+  }
+
+  td.text-left {
+    text-align: left;
+  }
+
+  tr.tableOver:hover {
+    background-color: aquamarine;
+  }
 </style>

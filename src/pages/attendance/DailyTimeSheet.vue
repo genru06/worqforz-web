@@ -32,7 +32,7 @@
     </HeaderLayout>
     <q-separator spaced inset />
     <div class="q-pa-md">
-      <q-markup-table class="gt-md" separator="cell">
+      <q-markup-table v-if="!otApproval" class="gt-md" separator="cell">
         <thead>
           <tr>
             <th colspan="100%">
@@ -210,6 +210,202 @@
               {{ d.remarks }}
             </td>
             <td>
+              <q-btn
+                dense
+                size="12px"
+                flat
+                icon="punch_clock"
+                @click="viewDTR(d)"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </q-markup-table>
+      <q-markup-table v-if="otApproval" class="gt-md" separator="cell">
+        <thead>
+          <tr>
+            <th colspan="100%">
+              <div class="row justify-between">
+                <div class="col-lg-4">
+                  <q-input
+                    class="text-md col-lg-3"
+                    borderless
+                    dense
+                    v-model="attendance_date"
+                    mask="date"
+                    label="Attendance Date : "
+                    bg-color="white"
+                  >
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy
+                          cover
+                          transition-show="scale"
+                          transition-hide="scale"
+                        >
+                          <q-date v-model="attendance_date">
+                            <div class="row items-center justify-end">
+                              <q-btn
+                                @click="fetchDailyAttendance"
+                                v-close-popup
+                                label="Fetch"
+                                color="primary"
+                                flat
+                              />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+
+                      <q-btn
+                        :disable="details.length == 0"
+                        dense
+                        color="teal"
+                        size="md"
+                        icon="thumb_up_alt"
+                        label="Approve Timesheet"
+                        @click="approveTimesheet"
+                      />
+                    </template>
+                  </q-input>
+                </div>
+                <span class="text-h6 q-pa-md">{{ day }}</span>
+              </div>
+            </th>
+          </tr>
+          <tr>
+            <th rowspan="2">
+              # <br /><q-checkbox
+                dense
+                v-model="selectAll"
+                @click="selectAllTimesheet"
+              />
+            </th>
+            <th class="text-center text-weight-bolder" rowspan="2">NAMES</th>
+            <td class="text-center" rowspan="2">POSITION</td>
+            <th class="text-center" colspan="5">TIME</th>
+            <!-- <th class="text-center" colspan="3">OVERTIME</th> -->
+            <th class="text-center" rowspan="2">REMARKS</th>
+            <th class="text-center" rowspan="2"></th>
+          </tr>
+          <tr>
+            <td class="text-center">IN</td>
+            <td class="text-center">OUT</td>
+            <td class="text-center">IN PM</td>
+            <td class="text-center">OUT PM</td>
+            <td class="text-center">HOURS</td>
+            <!-- <td class="text-center">IN</td>
+            <td class="text-center">OUT</td>
+            <td class="text-center">HOURS</td> -->
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="d in details"
+            :key="d.att_id"
+            :class="d.pr_status ? 'bg-green-3' : ''"
+          >
+            <td>
+              <q-checkbox
+                v-if="d.pr_status"
+                dense
+                v-model="selected[d.att_id]"
+                @click="voidSelected(d)"
+              />
+              <q-checkbox
+                v-if="!d.pr_status"
+                dense
+                v-model="selected[d.att_id]"
+                @click="selectOne(d)"
+              />
+            </td>
+            <td class="text-left">{{ d.name }}</td>
+            <td>{{ d.position }}</td>
+            <td v-if="d.pr_status">
+              {{ date.formatDate(d.date + " " + d.time_in, "hh:mm a") }}
+            </td>
+            <td
+              v-if="!d.pr_status"
+              @click="
+                editHours(d.att_id, 'time_in'), (employee_id = d.employee_id)
+              "
+            >
+              {{ date.formatDate(d.date + " " + d.time_in, "hh:mm a") }}
+            </td>
+            <td v-if="d.pr_status">
+              {{ date.formatDate(d.date + " " + d.time_out, "hh:mm a") }}
+            </td>
+            <td
+              v-if="!d.pr_status"
+              @click="
+                editHours(d.att_id, 'time_out'), (employee_id = d.employee_id)
+              "
+            >
+              {{ date.formatDate(d.date + " " + d.time_out, "hh:mm a") }}
+            </td>
+            <td v-if="d.pr_status">
+              {{ date.formatDate(d.date + " " + d.time_in_pm, "hh:mm a") }}
+            </td>
+            <td
+              v-if="!d.pr_status"
+              @click="
+                editHours(d.att_id, 'time_in_pm'), (employee_id = d.employee_id)
+              "
+            >
+              {{ date.formatDate(d.date + " " + d.time_in_pm, "hh:mm a") }}
+            </td>
+            <td v-if="d.pr_status">
+              {{ date.formatDate(d.date + " " + d.time_out_pm, "hh:mm a") }}
+            </td>
+            <td
+              v-if="!d.pr_status"
+              @click="
+                editHours(d.att_id, 'time_out_pm'),
+                  (employee_id = d.employee_id)
+              "
+            >
+              {{ date.formatDate(d.date + " " + d.time_out_pm, "hh:mm a") }}
+            </td>
+            <td>
+              {{ d.total_reg_hours }}
+            </td>
+            <!-- <td v-if="d.pr_status">
+              {{ d.time_in_ot }}
+            </td>
+            <td
+              v-if="!d.pr_status"
+              @click="
+                editHours(d.att_id, 'time_in_ot'), (employee_id = d.employee_id)
+              "
+            >
+              {{ d.time_in_ot }}
+            </td>
+            <td v-if="d.pr_status">
+              {{ d.time_out_ot }}
+            </td>
+            <td
+              v-if="!d.pr_status"
+              @click="
+                editHours(d.att_id, 'time_out_ot'),
+                  (employee_id = d.employee_id)
+              "
+            >
+              {{ d.time_out_ot }}
+            </td> -->
+            <!-- <td>
+              {{ d.totalOT }}
+            </td> -->
+            <td>
+              {{ d.remarks }}
+            </td>
+            <td>
+              <q-btn
+                dense
+                size="12px"
+                label="Apply for OT"
+                color="primary"
+                @click="applyOT(d)"
+              />
               <q-btn
                 dense
                 size="12px"
@@ -550,14 +746,12 @@
         />
       </q-card>
     </q-dialog>
-    <!-- <q-dialog v-model="dtrModal">
-      <dtr :details="employeeDTR" />
-      <q-card style="width: 980px !important">
-        <q-card-section>
-          
-        </q-card-section>
-      </q-card>
-    </q-dialog> -->
+    <q-dialog v-model="otRequestModal">
+      <OvertimeRequestForm
+        @close="otRequestModal = false"
+        :otDetails="otDetails"
+      />
+    </q-dialog>
   </div>
 </template>
 
@@ -568,6 +762,7 @@ import { useRoute } from "vue-router";
 import { hr_api } from "../../boot/axios";
 import HeaderLayout from "../../layouts/HeaderLayout.vue";
 import dtr from "../../components/payroll/DailyTimeRecord.vue";
+import OvertimeRequestForm from "../../components/payroll/OvertimeRequestForm.vue";
 
 const $q = useQuasar();
 const route = useRoute();
@@ -595,6 +790,9 @@ const timeShiftOptions = ref(timeShift);
 const timeShiftSelect = ref();
 const dtrModal = ref(false);
 const employeeDTR = ref();
+const otApproval = ref(true);
+const otRequestModal = ref(false);
+const otDetails = ref();
 
 isTL.value =
   localStorage.getItem("is_TL") == null ||
@@ -607,6 +805,11 @@ let selectedData = {};
 let filterTrue = 0;
 let s = [];
 let workplace = route.params.workplace;
+
+const applyOT = (details) => {
+  otRequestModal.value = true;
+  otDetails.value = details;
+};
 
 const getAttendance = async (att_date) => {
   attendance_date.value = att_date;

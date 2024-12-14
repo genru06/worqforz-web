@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { LocalStorage } from 'quasar';
+import { date, LocalStorage } from 'quasar';
 import { hr_api } from 'src/boot/axios';
 
 export const useConstants = defineStore('contantsStore', {
@@ -77,6 +77,25 @@ export const useConstants = defineStore('contantsStore', {
         .split(/\W+/)
         .map((word) => word[0])
         .join("");
+    },
+
+    calculateHoursSpent(start, end) {
+      // Parse the input dates
+      const startDate = new Date(date.formatDate(Date.now(), 'YYYY-MM-DD ') + start);
+      const endDate = new Date(date.formatDate(Date.now(), 'YYYY-MM-DD ') + end);
+
+      // Ensure valid dates
+      if (isNaN(startDate) || isNaN(endDate)) {
+        throw new Error("Invalid date format");
+      }
+
+      // Calculate the difference in milliseconds
+      const diffInMs = endDate - startDate;
+
+      // Convert milliseconds to hours
+      const hours = diffInMs / (1000 * 60 * 60);
+
+      return hours;
     }
 
   }
